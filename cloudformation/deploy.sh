@@ -6,14 +6,13 @@ set -e
 
 aws cloudformation validate-template \
     --template-body file://template.yaml \
-    --region us-west-2
 
 aws cloudformation deploy \
     --template-file template.yaml \
-    --stack-name scarcity-dev \
-    --region us-west-2 \
+    --stack-name scarcity-$1 \
+    --capabilities CAPABILITY_IAM
     --parameter-overrides \
-    GitShaParameter=$(git rev-parse --short HEAD) \
+    "GitShaParameter=$(git rev-parse --short HEAD)" \
     --tags \
     env=$1 \
     project=scarcity

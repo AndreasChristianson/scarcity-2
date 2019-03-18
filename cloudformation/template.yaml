@@ -2,31 +2,88 @@ AWSTemplateFormatVersion: "2010-09-09"
 
 Parameters:
   EnvParameter:
-    Default: dev
     Type: String
     AllowedValues: 
       - dev
       - int
       - prod
+  BucketNameParameter:
+    Type: String
+    Default: scarcity-artifacts
   GitShaParameter:
     Type: String
 
-# Mappings:
-#   set of mappings
-
-# Conditions:
-#   set of conditions
-
-# Transform:
-#   set of transforms
-
 Resources:
-  scarcityApi:
+  ScarcityApi:
     Type: 'AWS::ApiGatewayV2::Api'
     Properties:
       Name: !Sub "scarcity-objects-${EnvParameter}"
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.action
+  EchoRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ScarcityApi
+      RouteKey: echo
+      AuthorizationType: NONE
+      Target: !Join ['/', ['integrations', !Ref EchoIntegration]]
+  EchoIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ScarcityApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EchoFunction.Arn}/invocations
+  Deployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+    - EchoRoute
+    Properties:
+      ApiId: !Ref ScarcityApi
+  Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: !Ref EnvParameter
+      DeploymentId: !Ref Deployment
+      ApiId: !Ref ScarcityApi
 
-# Outputs:
-#   set of outputs
+# Functions
+  EchoFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: handler
+      Runtime: nodejs8.10
+      Role: 
+        Fn::GetAtt: 
+          - "LambdaExecutionRole"
+          - "Arn"
+      Code: 
+        S3Bucket: !Ref BucketNameParameter
+        S3Key: !Sub "${EnvParameter}/echo-${GitShaParameter}.zip"
+  EchoPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - ScarcityApi
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref EchoFunction
+      Principal: apigateway.amazonaws.com
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+
+Outputs:
+  EchoFunctionArn:
+    Description: "Echo function ARN"
+    Value: !GetAtt EchoFunction.Arn
+  WebSocketURI:
+    Description: "The WSS Protocol URI to connect to"
+    Value: !Join [ '', [ 'wss://', !Ref ScarcityApi, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/',!Ref 'Stage'] ]
