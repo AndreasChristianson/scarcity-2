@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+cd "${0%/*}"
+
 set -e
 
 aws cloudformation validate-template \
@@ -11,7 +13,7 @@ aws cloudformation deploy \
     --stack-name scarcity-dev \
     --region us-west-2 \
     --parameter-overrides \
-    GitShaParameter=123 \
+    GitShaParameter=$(git rev-parse --short HEAD) \
     --tags \
-    env=dev \
+    env=$1 \
     project=scarcity
