@@ -58,7 +58,7 @@ Resources:
           - "Arn"
       Code: 
         S3Bucket: !Ref BucketNameParameter
-        S3Key: !Sub "${EnvParameter}/echo-${GitShaParameter}.zip"
+        S3Key: !Sub "echo-${GitShaParameter}.zip"
   EchoPermission:
     Type: AWS::Lambda::Permission
     DependsOn:

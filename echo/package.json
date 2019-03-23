@@ -4,6 +4,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "jest --coverage",
+    "prebuild": "rm -rf dist",
     "build": "babel src -d dist"
   },
   "devDependencies": {
