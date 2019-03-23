@@ -16,3 +16,6 @@ aws cloudformation deploy \
     --tags \
     env=$1 \
     project=scarcity
+
+aws cloudformation describe-stacks \
+    --stack-name scarcity-$1
