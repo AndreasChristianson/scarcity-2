@@ -5,9 +5,10 @@ exports.handler = async (event, context) => {
 
     return { 
         statusCode: 200, 
-        body: {
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
             echo: true,
             ...postData
-        } 
+        }) 
     };
 };

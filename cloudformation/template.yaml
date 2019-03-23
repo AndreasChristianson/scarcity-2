@@ -13,6 +13,8 @@ Parameters:
   GitShaParameter:
     Type: String
 
+Transform: 'AWS::Serverless-2016-10-31'
+
 Resources:
   ScarcityApi:
     Type: 'AWS::ApiGatewayV2::Api'
@@ -20,6 +22,7 @@ Resources:
       Name: !Sub "scarcity-objects-${EnvParameter}"
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.action
+    DependsOn: ApiGatewayAccount
   EchoRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -42,43 +45,75 @@ Resources:
   Stage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
+      DefaultRouteSettings:
+        LoggingLevel: ERROR
+        DataTraceEnabled: true
+      AccessLogSettings:
+        DestinationArn: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:scarcity-objects-${EnvParameter}
+        Format: >-
+          {"requestId":"$context.requestId", "ip": "$context.identity.sourceIp",
+          "caller":"$context.identity.caller",
+          "user":"$context.identity.user","requestTime":"$context.requestTime",
+          "eventType":"$context.eventType","routeKey":"$context.routeKey",
+          "status":"$context.status","connectionId":"$context.connectionId"
+          "error":"$context.error.message"}
       StageName: !Ref EnvParameter
       DeploymentId: !Ref Deployment
       ApiId: !Ref ScarcityApi
-
-# Functions
-  EchoFunction:
-    Type: AWS::Lambda::Function
-    Properties:
-      Handler: index.handler
-      Runtime: nodejs8.10
-      Role: 
-        Fn::GetAtt: 
-          - "LambdaExecutionRole"
-          - "Arn"
-      Code: 
-        S3Bucket: !Ref BucketNameParameter
-        S3Key: !Sub "echo-${GitShaParameter}.zip"
-  EchoPermission:
-    Type: AWS::Lambda::Permission
-    DependsOn:
-      - ScarcityApi
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref EchoFunction
-      Principal: apigateway.amazonaws.com
-  LambdaExecutionRole:
+  CloudWatchRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
         Statement:
-        - Effect: Allow
+        - Action:
+            - sts:AssumeRole
+          Effect: "Allow"
           Principal:
             Service:
-            - lambda.amazonaws.com
-          Action:
-          - sts:AssumeRole
+              - "apigateway.amazonaws.com"
+        Version: '2012-10-17'
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+  ApiGatewayAccount: 
+    Type: AWS::ApiGateway::Account
+    Properties: 
+      CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
+
+# Functions
+  EchoFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs8.10
+      CodeUri:
+        Bucket: !Ref BucketNameParameter
+        Key: !Sub 'echo-${GitShaParameter}.zip'
+  # EchoPermission:
+  #   Type: AWS::Lambda::Permission
+  #   DependsOn:
+  #     - ScarcityApi
+  #   Properties:
+  #     Action: lambda:InvokeFunction
+  #     FunctionName: !Ref EchoFunction
+  #     Principal: apigateway.amazonaws.com
+  # LambdaExecutionRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #       - Effect: Allow
+  #         Principal:
+  #           Service:
+  #           - lambda.amazonaws.com
+  #         Action:
+  #         - sts:AssumeRole
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "scarcity-objects-${EnvParameter}"
+      RetentionInDays: 7
 
 Outputs:
   EchoFunctionArn:

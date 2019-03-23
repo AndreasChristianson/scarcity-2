@@ -13,6 +13,7 @@ aws cloudformation deploy \
     --capabilities CAPABILITY_IAM \
     --parameter-overrides \
     "GitShaParameter=$(git rev-parse --short HEAD)" \
+    "EnvParameter=$1" \
     --tags \
     env=$1 \
     project=scarcity
