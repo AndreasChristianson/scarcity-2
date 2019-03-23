@@ -50,7 +50,7 @@ Resources:
   EchoFunction:
     Type: AWS::Lambda::Function
     Properties:
-      Handler: handler
+      Handler: index.handler
       Runtime: nodejs8.10
       Role: 
         Fn::GetAtt: 
