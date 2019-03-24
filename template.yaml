@@ -5,7 +5,6 @@ Parameters:
     Type: String
     AllowedValues: 
       - dev
-      - int
       - prod
   BucketNameParameter:
     Type: String
@@ -14,7 +13,14 @@ Parameters:
     Type: String  
   LayerVersionParameter:
     Type: String
-    Default: '0'
+  TldParameter:
+    Type: String
+    Default: pessimistic-it.com
+
+Mappings:
+  EnvMap:
+    dev:
+      CertificateArn: arn:aws:acm:us-west-2:470576235824:certificate/db051ea9-3d67-4af8-9cd7-d415e075a100
 
 Transform: 'AWS::Serverless-2016-10-31'
 
@@ -22,7 +28,7 @@ Resources:
   ScarcityApi:
     Type: 'AWS::ApiGatewayV2::Api'
     Properties:
-      Name: !Sub "scarcity-objects-${EnvParameter}"
+      Name: !Sub "scarcity-${EnvParameter}"
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.action
     DependsOn: ApiGatewayAccount
@@ -73,6 +79,33 @@ Resources:
     Type: AWS::ApiGateway::Account
     Properties: 
       CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
+  # DomainName:
+  #   Type: 'AWS::ApiGateway::DomainName'
+  #   Properties:
+  #     RegionalCertificateArn: !FindInMap
+  #       - EnvMap
+  #       - !Ref EnvParameter
+  #       - CertificateArn
+  #     EndpointConfiguration:
+  #       Types:
+  #       - REGIONAL
+  #     DomainName: !Sub "${EnvParameter}.scarcity.${TldParameter}"
+  DomainMapping:
+    Type: 'AWS::ApiGateway::BasePathMapping'
+    Properties:
+      Stage: !Ref EnvParameter
+      BasePath: "api"
+      DomainName: !Sub "${EnvParameter}.scarcity.${TldParameter}"
+      RestApiId: !Ref ScarcityApi
+  DnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget: 
+        DNSName: !Join [ '', [ !Ref ScarcityApi, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com'] ]
+        HostedZoneId: Z2OJLYMUO9EFXC
+      HostedZoneName: !Sub "${TldParameter}."
+      Name: !Sub "${EnvParameter}.scarcity.${TldParameter}."
+      Type: A
 
 # Functions
   SharedLayer:
@@ -119,4 +152,4 @@ Outputs:
     Value: !GetAtt EchoFunction.Arn
   WebSocketURI:
     Description: "The WSS Protocol URI to connect to"
-    Value: !Join [ '', [ 'wss://', !Ref ScarcityApi, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/',!Ref 'Stage'] ]
+    Value: !Join [ '', [ 'wss://', !Ref ScarcityApi, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref 'Stage'] ]
