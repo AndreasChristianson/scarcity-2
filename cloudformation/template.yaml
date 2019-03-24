@@ -22,7 +22,6 @@ Resources:
       Name: !Sub "scarcity-objects-${EnvParameter}"
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.action
-    DependsOn: ApiGatewayAccount
   EchoRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -48,37 +47,9 @@ Resources:
       DefaultRouteSettings:
         LoggingLevel: ERROR
         DataTraceEnabled: true
-      AccessLogSettings:
-        DestinationArn: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:scarcity-objects-${EnvParameter}
-        Format: >-
-          {"requestId":"$context.requestId", "ip": "$context.identity.sourceIp",
-          "caller":"$context.identity.caller",
-          "user":"$context.identity.user","requestTime":"$context.requestTime",
-          "eventType":"$context.eventType","routeKey":"$context.routeKey",
-          "status":"$context.status","connectionId":"$context.connectionId"
-          "error":"$context.error.message"}
       StageName: !Ref EnvParameter
       DeploymentId: !Ref Deployment
       ApiId: !Ref ScarcityApi
-  CloudWatchRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Action:
-            - sts:AssumeRole
-          Effect: "Allow"
-          Principal:
-            Service:
-              - "apigateway.amazonaws.com"
-        Version: '2012-10-17'
-      Path: /
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
-  ApiGatewayAccount: 
-    Type: AWS::ApiGateway::Account
-    Properties: 
-      CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
 
 # Functions
   EchoFunction:
@@ -89,30 +60,19 @@ Resources:
       CodeUri:
         Bucket: !Ref BucketNameParameter
         Key: !Sub 'echo-${GitShaParameter}.zip'
-  # EchoPermission:
-  #   Type: AWS::Lambda::Permission
-  #   DependsOn:
-  #     - ScarcityApi
-  #   Properties:
-  #     Action: lambda:InvokeFunction
-  #     FunctionName: !Ref EchoFunction
-  #     Principal: apigateway.amazonaws.com
-  # LambdaExecutionRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     AssumeRolePolicyDocument:
-  #       Version: '2012-10-17'
-  #       Statement:
-  #       - Effect: Allow
-  #         Principal:
-  #           Service:
-  #           - lambda.amazonaws.com
-  #         Action:
-  #         - sts:AssumeRole
-  LogGroup:
-    Type: AWS::Logs::LogGroup
+  EchoPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - ScarcityApi
     Properties:
-      LogGroupName: !Sub "scarcity-objects-${EnvParameter}"
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref EchoFunction
+      Principal: apigateway.amazonaws.com
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    Properties:
+      LogGroupName: !Join ["", ["/aws/lambda/", !Ref EchoFunction]]
       RetentionInDays: 7
 
 Outputs:
