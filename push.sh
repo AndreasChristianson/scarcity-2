@@ -14,6 +14,8 @@ fi
 
 for D in functions/*/; 
 do 
+    npm --prefix $D install
+    npm --prefix $D run build
     cd ${D}dist;
     zip -rX app.zip .
     cd -
