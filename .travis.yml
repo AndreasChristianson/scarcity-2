@@ -1,3 +1,6 @@
+language: node_js
+node_js:
+- node
 dist: xenial
 env:
   global:
@@ -8,9 +11,6 @@ env:
 jobs:
   include:
   - stage: build
-    language: node_js
-    node_js:
-    - node
     cache:
     - pip
     - npm
@@ -21,9 +21,6 @@ jobs:
     - ./push.sh
   - stage: deploy-dev
     if: branch = master
-    language: python
-    python:
-    - '3.7'
     cache:
     - pip
     before_script:
