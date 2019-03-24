@@ -14,15 +14,16 @@ jobs:
     - ./build.sh
   - stage: upload
     script:
-    - pip install --user awscli
+    - pip install -q --user awscli
     - ./push.sh
   - stage: deploy-dev
     script:
-    - pip install --user awscli
+    - pip install -q --user awscli
     - ./deploy.sh dev
   - stage: test-dev
     script: 
     - npm install -g wscat
+    - pip install -q --user awscli
     - url=$(aws cloudformation describe-stacks  --stack-name scarcity-dev | jq --raw-output '.Stacks[0].Outputs[] | select(.OutputKey == "WebSocketURI") | .OutputValue')
     - response=$(wscat --execute '{"action":"echo","echo":"$TRAVIS_JOB_NUMBER"}' --connect $url)
     - if [[ ${response} != *"$TRAVIS_JOB_NUMBER"* ]];then exit 1; fi
