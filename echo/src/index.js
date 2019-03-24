@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 
 exports.handler = async (event, context) => {
-    const {echo} = JSON.parse(event.body);
+    const { echo = 'hello world!' } = JSON.parse(event.body);
     const postData = JSON.stringify(echo);
 
     const apigwManagementApi = new AWS.ApiGatewayManagementApi({

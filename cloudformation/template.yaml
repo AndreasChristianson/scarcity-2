@@ -80,6 +80,13 @@ Resources:
       CodeUri:
         Bucket: !Ref BucketNameParameter
         Key: !Sub 'echo-${GitShaParameter}.zip'
+      Policies:
+      - Statement:
+        - Effect: Allow
+          Action:
+          - 'execute-api:ManageConnections'
+          Resource:
+          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ScarcityApi}/*'
   EchoPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
