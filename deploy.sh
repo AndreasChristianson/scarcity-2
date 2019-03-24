@@ -1,11 +1,9 @@
 #!/usr/bin/env sh
 
-cd "${0%/*}"
-
 set -e -o xtrace
 
 aws cloudformation validate-template \
-    --template-body file://template.yaml \
+    --template-body file://template.yaml
 
 aws cloudformation deploy \
     --template-file template.yaml \
@@ -13,6 +11,7 @@ aws cloudformation deploy \
     --capabilities CAPABILITY_IAM \
     --parameter-overrides \
     "GitShaParameter=$(git rev-parse --short HEAD)" \
+    "LayerVersionParameter=${layer_version}" \
     "EnvParameter=$1" \
     --tags \
     env=$1 \

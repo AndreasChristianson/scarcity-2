@@ -11,7 +11,10 @@ Parameters:
     Type: String
     Default: scarcity-artifacts
   GitShaParameter:
+    Type: String  
+  LayerVersionParameter:
     Type: String
+    Default: '0'
 
 Transform: 'AWS::Serverless-2016-10-31'
 
@@ -72,6 +75,12 @@ Resources:
       CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
 
 # Functions
+  SharedLayer:
+    Type: "AWS::Lambda::LayerVersion"
+    Properties:
+      Content: 
+        S3Bucket: !Ref BucketNameParameter
+        S3Key: !Sub 'layer/${LayerVersionParameter}.zip'
   EchoFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -79,7 +88,9 @@ Resources:
       Runtime: nodejs8.10
       CodeUri:
         Bucket: !Ref BucketNameParameter
-        Key: !Sub 'echo-${GitShaParameter}.zip'
+        Key: !Sub 'echo/${GitShaParameter}.zip'
+      Layers:
+        - !Ref SharedLayer
       Policies:
       - Statement:
         - Effect: Allow

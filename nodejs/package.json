@@ -1,0 +1,11 @@
+{
+  "name": "lambda-layer",
+  "version": "1.0.0",
+  "license": "ISC",
+  "scripts": {
+    "get-version": "echo $npm_package_version"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.427.0"
+  }
+}
