@@ -4,38 +4,31 @@ node_js:
 env:
   global:
   - AWS_REGION=your_aws_region
+  - PATH=$HOME/.local/bin:$PATH
   - secure: yfUvhJKRdcpZVsmHx7damPFEYyJIjoGq+XfjKnOZ20VXFMfRikQn6QZQkGcIEDtFlFqWPLaYUgPB++kz+PzMj9FPrfso4VM5eaO6pN4F8jNpw1upnCAmP2qzWT1VWKe3+WBMqobrNjVzcTpz3sfRbMqYpKOTbjoJbVRlBeeKnbU0p4dWsUsD6LicrSMbp3O+23gv7iV1jNtUDOI3ObGJB2FyDp/+Abr2aQ9pE4BsX0YocDzL+qACtBUnjPqOl19xikSUVoTKa85S9cL9a/ncLRDS8+yK1FOYLkc/jGkhEYXinV1PMcRjBGhI+83LPTYnt23w9OO6ufpa4sTdP3I2fRq+nojuR57mAgqp6jZwb8iaDb77++ZbecYH0uHjm/EeTADo3weCVD+mm7P7NOoYNdbd43dQgORZE5kDE70SbyjsfkQGAMEC+7Oy4ZKbQtpRTdtXp+5Y/B0Y17Cp4c1Pad0XFd2DbH8OJmrLkDhyolrl/zpaLiI2QeV7fxlPbZtaTeXthTccWZnRJAV9nznD+p57S77GWc1G9NryHAMRQy/PAIGsvLRaLu85wYSjr9qE1w7OJzHU1ZwZG+65fKkT4/d5tmTQWaDXG1b+8D8l7nN8u0iJOAzKYn2GsIuxRir4olQ5kZC4O1KEqfaJvPcTIbyFmqVRybocjEuHCScDE48=
   - secure: vtEXal0r7zcGcM7FkOooPJpkAEYoXdk7n1uBRWVyccWgCXCnUKCdNalIP/6skyiKv2er9YWi8N3svi2vlGo3/wGJUT18n9PzPqsHLDhKSBYJhohzv7LwVXgK7Ol9rmjeDNp76kyQpFWallF/QgWBq+Pi/G6t+L4rDCDxqxUVs/0nxSQ6UVvkaBLli2nnFWOCyrtp58B4vWS2Srhqr6Hb6ZJgot6xaeaVQJMNkd4rc2WgbvHidQXAOz4dQs6azjY4IQ5POmADWQ56XT037ggxTQiYNWkyGG4s2GZoe/ATNQOcpn/y5PcWXiLraPpu8dJFXGUpvTlrDIqRjw56KdrQF5Y3//yCuRTTO6j398A6OOgSxaKfHX3+i2C2Euqu54ouX8TxNUzAy5G2T27WzRUIHLrCxIZLUK8347UGvLcpkKvVDPCyndx2v/A1Eo5bGFTPai+llQ3rC49vCVY+DAthQM6hpbo5uko8JgHu4s9x3HVb7QIcCHJe2AmoXQO+bhmRdlFA/dgIQE9hwzUDr9L5/JC5HA62Lkk2WF/J2ci3ROwaOV0z0VStuAWvoUL/H/bQqg3VCsYXJ3BuiUpkCy7kg2T1cmQegnTaTdkjR+9KDrF+S9Q1mUIwnaw5X9OiHcOXh7ioGzj4HgRPXgzbyjU0ZPPyORcrSZLeHn6PHx/CvVI=
 jobs:
   include:
   - stage: setup
     script: 
-    - export layer_version=$(npm --prefix nodejs --silent run get-version)
-    - export git_sha=$(git rev-parse --short HEAD)
     - pip install --user awscli
-    - export PATH=$PATH:$HOME/.local/bin
+    - npm install -g wscat
   - stage: build
-    script: ./build.sh
+    script: 
+    - ./build.sh
   - stage: upload
-    script: ./push.sh $git_sha $layer_version
-  # - stage: deploy to dev
-  #   script: ./deploy.sh
-  #   deploy:
-  #     provider: heroku
-  #     app: sf-stages-staging
-  #     api_key: "$HEROKU_AUTH_TOKEN"
-  # - stage: test staging
-  #   script: curl http://sf-stages-staging.herokuapp.com
-  # - stage: deploy to production
-  #   script: skip
-  #   deploy:
-  #     provider: heroku
-  #     app: sf-stages-production
-  #     api_key: "$HEROKU_AUTH_TOKEN"
-  # - stage: test production
-  #   script: curl http://sf-stages-production.herokuapp.com
+    script: ./push.sh
+  - stage: deploy-dev
+    script: ./deploy.sh dev
+  - stage: test-dev
+    script: 
+    - url=$(aws cloudformation describe-stacks  --stack-name scarcity-dev | jq --raw-output '.Stacks[0].Outputs[] | select(.OutputKey == "WebSocketURI") | .OutputValue')
+    - response=$(wscat --execute '{"action":"echo","echo":"$TRAVIS_JOB_NUMBER"}' --connect $url)
+    - if [[ ${response} != *"$TRAVIS_JOB_NUMBER"* ]];then exit 1; fi
 
 stages:
 - setup
 - build
 - upload
+- deploy-dev
+- test-dev

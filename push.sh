@@ -2,25 +2,27 @@
 
 set -e -o xtrace
 
-rm -rf nodejs/node_modules
-npm --prefix nodejs install --production
-zip -rqX nodejs/node_modules/layer.zip nodejs/node_modules
 layer_version=$(npm --prefix nodejs --silent run get-version)
-aws s3 cp nodejs/node_modules/layer.zip s3://scarcity-artifacts/layer/${layer_version}.zip
+git_sha=$(git rev-parse --short HEAD)
+
+if [ ! $(aws s3api head-object --bucket scarcity-artifacts --key layer/$layer_version.zip) ]; then
+    rm -rf nodejs/node_modules
+    npm --prefix nodejs install --production
+    zip -rqX nodejs/node_modules/layer.zip nodejs/node_modules
+    aws s3 cp nodejs/node_modules/layer.zip s3://scarcity-artifacts/layer/$layer_version.zip
+fi
 
 for D in functions/*/; 
 do 
-    npm --prefix echo run test; 
+    cd ${D}dist;
+    zip -rX app.zip .
+    cd -
+    rm -rf ${D}node_modules
+    npm --prefix $D install --production
+    if [ -d "${D}node_modules" ]; then
+        cd $D
+        zip -rqX dist/app.zip node_modules
+        cd -
+    fi 
+    aws s3 cp ${D}dist/app.zip s3://scarcity-artifacts/${D}$git_sha.zip
 done
-
-npm --prefix echo install
-npm --prefix echo run build
-rm -rf echo/node_modules
-npm --prefix echo install --production
-cd echo/dist
-zip -r -X app.zip .
-cd -
-# cd echo
-# zip -rqX dist/app.zip node_modules
-# cd -
-aws s3 cp echo/dist/app.zip s3://scarcity-artifacts/echo/$(git rev-parse --short HEAD).zip
