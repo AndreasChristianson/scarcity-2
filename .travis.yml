@@ -12,7 +12,7 @@ jobs:
   - stage: build
     script: 
     - ./build.sh
-  - stage: upload
+  -
     script:
     - pip install -qqq --user awscli
     - ./push.sh
@@ -20,16 +20,10 @@ jobs:
     script:
     - pip install -qqq --user awscli
     - ./deploy.sh dev
-  - stage: test-dev
-    script: 
     - npm install -g wscat
-    - pip install -qqq --user awscli
     - ./test.sh dev
 
 stages:
 - build
-- upload
 - name: deploy-dev
-  if: branch = master
-- name: test-dev
   if: branch = master
