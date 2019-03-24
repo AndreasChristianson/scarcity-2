@@ -1,6 +1,4 @@
-language: node_js
-node_js:
-- node
+dist: xenial
 env:
   global:
   - AWS_DEFAULT_REGION=us-west-2
@@ -10,20 +8,27 @@ env:
 jobs:
   include:
   - stage: build
+    language: node_js
+    node_js:
+    - node
+    cache:
+    - pip
+    - npm
+    before_script:
+    - pip install --user awscli
     script: 
     - ./build.sh
-  -
-    script:
-    - pip install -qqq --user awscli
     - ./push.sh
   - stage: deploy-dev
-    script:
-    - pip install -qqq --user awscli
-    - ./deploy.sh dev
+    if: branch = master
+    language: python
+    python:
+    - '3.7'
+    cache:
+    - pip
+    before_script:
+    - pip install --user awscli
     - npm install -g wscat
+    script:
+    - ./deploy.sh dev
     - ./test.sh dev
-
-stages:
-- build
-- name: deploy-dev
-  if: branch = master

@@ -1,11 +1,11 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 set -e -o xtrace
 
 layer_version=$(npm --prefix nodejs --silent run get-version)
 git_sha=$(git rev-parse --short HEAD)
 
-if [ ! $(aws s3api head-object --bucket scarcity-artifacts --key layer/$layer_version.zip) ]; then
+if [ $(aws s3api head-object --bucket scarcity-artifacts --key layer/$layer_version.zip | wc -c) -eq 0 ]; then
     rm -rf nodejs/node_modules
     npm --prefix nodejs install --production
     zip -rqX nodejs/node_modules/layer.zip nodejs/node_modules
