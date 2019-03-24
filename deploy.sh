@@ -19,4 +19,3 @@ aws cloudformation deploy \
     --tags \
     env=$1 \
     project=scarcity
-
