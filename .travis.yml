@@ -14,16 +14,16 @@ jobs:
     - ./build.sh
   - stage: upload
     script:
-    - pip install -qq --user awscli
+    - pip install -qqq --user awscli
     - ./push.sh
   - stage: deploy-dev
     script:
-    - pip install -qq --user awscli
+    - pip install -qqq --user awscli
     - ./deploy.sh dev
   - stage: test-dev
     script: 
     - npm install -g wscat
-    - pip install -qq --user awscli
+    - pip install -qqq --user awscli
     - ./test.sh dev
 
 stages:
