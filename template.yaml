@@ -120,7 +120,7 @@ Resources:
       - Statement:
         - Effect: Allow
           Action:
-          - 'execute-api:ManageConnections'
+          - 'execute-api:*'
           Resource:
           - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ScarcityApi}/*'
   EchoPermission:
