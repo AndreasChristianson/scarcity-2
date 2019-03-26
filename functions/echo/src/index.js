@@ -6,7 +6,7 @@ exports.handler = async (event, context) => {
 
     const apigwManagementApi = new AWS.ApiGatewayManagementApi({
         apiVersion: '2018-11-29',
-        endpoint: `${event.apiId}.execute-api.${process.env['AWS_REGION']}.amazonaws.com/${event.stage}`        
+        endpoint: `${event.requestContext.apiId}.execute-api.${process.env['AWS_REGION']}.amazonaws.com/${event.requestContext.stage}` 
     });
 
     const connectionId = event.requestContext.connectionId;
