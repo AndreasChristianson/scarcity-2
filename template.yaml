@@ -20,12 +20,13 @@ Parameters:
 Mappings:
   EnvMap:
     dev:
-      TargetDomain: d-3jqefdduh5.execute-api.us-west-2.amazonaws.com
+      TargetWssDomain: d-0dvn1b4czh.execute-api.us-west-2.amazonaws.com
 
 Transform: 'AWS::Serverless-2016-10-31'
 
 Resources:
-  ScarcityApi:
+# Wss Api
+  ScarcityWss:
     Type: 'AWS::ApiGatewayV2::Api'
     Properties:
       Name: !Sub "scarcity-${EnvParameter}"
@@ -35,14 +36,14 @@ Resources:
   EchoRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
-      ApiId: !Ref ScarcityApi
+      ApiId: !Ref ScarcityWss
       RouteKey: echo
       AuthorizationType: NONE
       Target: !Join ['/', ['integrations', !Ref EchoIntegration]]
   EchoIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
-      ApiId: !Ref ScarcityApi
+      ApiId: !Ref ScarcityWss
       IntegrationType: AWS_PROXY
       IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EchoFunction.Arn}/invocations
   Deployment:
@@ -50,16 +51,15 @@ Resources:
     DependsOn:
     - EchoRoute
     Properties:
-      ApiId: !Ref ScarcityApi
+      ApiId: !Ref ScarcityWss
   Stage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
-      DefaultRouteSettings:
-        LoggingLevel: ERROR
-        DataTraceEnabled: true
-      StageName: !Ref EnvParameter
+      StageName: !Ref GitShaParameter
       DeploymentId: !Ref Deployment
-      ApiId: !Ref ScarcityApi
+      ApiId: !Ref ScarcityWss
+      StageVariables:
+      - gitSha: !Ref GitShaParameter
   CloudWatchRole:
     Type: AWS::IAM::Role
     Properties:
@@ -84,8 +84,8 @@ Resources:
     Properties:
       Stage: !Ref EnvParameter
       BasePath: "wss"
-      DomainName: !Sub "${EnvParameter}.scarcity.${TldParameter}"
-      RestApiId: !Ref ScarcityApi
+      DomainName: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}"
+      RestApiId: !Ref ScarcityWss
   DnsRecord:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -93,13 +93,13 @@ Resources:
         DNSName: !FindInMap
           - EnvMap
           - !Ref EnvParameter
-          - TargetDomain
+          - TargetWssDomain
         HostedZoneId: Z2OJLYMUO9EFXC
       HostedZoneName: !Sub "${TldParameter}."
-      Name: !Sub "${EnvParameter}.scarcity.${TldParameter}."
+      Name: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}."
       Type: A
 
-# Functions
+# Wss Functions
   SharedLayer:
     Type: "AWS::Lambda::LayerVersion"
     Properties:
@@ -111,6 +111,7 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: nodejs8.10
+      AutoPublishAlias: !Ref GitShaParameter
       CodeUri:
         Bucket: !Ref BucketNameParameter
         Key: !Sub 'functions/echo/${GitShaParameter}.zip'
@@ -122,11 +123,11 @@ Resources:
           Action:
           - 'execute-api:ManageConnections'
           Resource:
-          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ScarcityApi}/*'
+          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ScarcityWss}/*'
   EchoPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
-      - ScarcityApi
+      - ScarcityWss
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref EchoFunction
@@ -144,4 +145,4 @@ Outputs:
     Value: !GetAtt EchoFunction.Arn
   WebSocketURI:
     Description: "The WSS Protocol URI to connect to"
-    Value: !Join [ '', [ 'wss://', !Ref ScarcityApi, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref 'Stage'] ]
+    Value: !Join [ '', [ 'wss://', !Ref ScarcityWss, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref 'Stage'] ]
