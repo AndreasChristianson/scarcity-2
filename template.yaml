@@ -83,7 +83,6 @@ Resources:
     Type: 'AWS::ApiGateway::BasePathMapping'
     Properties:
       Stage: !Ref EnvParameter
-      BasePath: "wss"
       DomainName: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}"
       RestApiId: !Ref ScarcityWss
   DnsRecord:
