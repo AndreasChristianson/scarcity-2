@@ -18,4 +18,5 @@ aws cloudformation deploy \
     "EnvParameter=$1" \
     --tags \
     env=$1 \
-    project=scarcity
+    project=scarcity \
+    --no-fail-on-empty-changeset 
