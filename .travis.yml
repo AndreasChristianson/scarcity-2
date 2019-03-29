@@ -17,8 +17,8 @@ jobs:
     before_script:
     - pip install --user awscli
     script: 
+    - ./unit.sh
     - ./build.sh
-    - ./push.sh
   - stage: deploy-dev
     if: branch = master
     cache:
@@ -28,4 +28,4 @@ jobs:
     - npm install -g wscat
     script:
     - ./deploy.sh dev
-    - ./test.sh dev
+    - ./smoke-test.sh dev
