@@ -82,7 +82,7 @@ Resources:
   DomainMapping:
     Type: 'AWS::ApiGateway::BasePathMapping'
     Properties:
-      Stage: !Ref EnvParameter
+      Stage: !Ref Stage
       DomainName: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}"
       RestApiId: !Ref ScarcityWss
   DnsRecord:
@@ -143,5 +143,7 @@ Outputs:
     Description: "Echo function ARN"
     Value: !GetAtt EchoFunction.Arn
   WebSocketURI:
-    Description: "The WSS Protocol URI to connect to"
+    Description: "Raw websocket uri"
     Value: !Join [ '', [ 'wss://', !Ref ScarcityWss, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref 'Stage'] ]
+  WebSocketDomain:
+    Value: !Sub "wss://wss.${EnvParameter}.scarcity.${TldParameter}"
