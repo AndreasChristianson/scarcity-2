@@ -12,19 +12,38 @@ if [ $(aws s3api head-object --bucket scarcity-artifacts --key layer/$layer_vers
     aws s3 cp nodejs/node_modules/layer.zip s3://scarcity-artifacts/layer/$layer_version.zip
 fi
 
-for D in packages/{wss,rest}/*/; 
-do 
-    npm --prefix $D install
-    npm --prefix $D run build
-    cd ${D}dist;
+
+packageFunction() {
+    if [ ! -d "${1}" ]; then
+        return
+    fi
+    npm --prefix $1 install
+    npm --prefix $1 run build
+    cd ${1}dist;
     zip -rX app.zip .
     cd -
-    rm -rf ${D}node_modules
-    npm --prefix $D install --production
-    if [ -d "${D}node_modules" ]; then
-        cd $D
+    rm -rf ${1}node_modules
+    npm --prefix $1 install --production
+    if [ -d "${1}node_modules" ]; then
+        cd $1
         zip -rqX dist/app.zip node_modules
         cd -
     fi 
-    aws s3 cp ${D}dist/app.zip s3://scarcity-artifacts/${git_sha}/${D}app.zip
+    aws s3 cp ${1}dist/app.zip s3://scarcity-artifacts/${git_sha}/${1}app.zip
+}
+
+cd packages
+
+for D in wss/*/; 
+do 
+    packageFunction $D
 done
+
+for D in rest/*/; 
+do 
+    packageFunction $D
+done
+
+cd ..
+
+
