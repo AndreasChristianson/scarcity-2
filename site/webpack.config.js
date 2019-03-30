@@ -1,5 +1,10 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
+
+const commitHash = require('child_process')
+  .execSync('git rev-parse --short HEAD')
+  .toString();
 
 module.exports = {
   entry: './src/index.js',
@@ -25,6 +30,9 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: 'Scarcity',
       template: 'src/index-template.html'
+    }),
+    new webpack.DefinePlugin({
+      __COMMIT_HASH__: JSON.stringify(commitHash),
     })
   ]
 };

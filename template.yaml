@@ -98,6 +98,8 @@ Resources:
       Name: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}."
       Type: A
 
+# Site
+
 # Wss Functions
   SharedLayer:
     Type: "AWS::Lambda::LayerVersion"
@@ -113,7 +115,7 @@ Resources:
       AutoPublishAlias: !Ref GitShaParameter
       CodeUri:
         Bucket: !Ref BucketNameParameter
-        Key: !Sub 'functions/echo/${GitShaParameter}.zip'
+        Key: !Sub '${GitShaParameter}/wss/echo.zip'
       Layers:
         - !Ref SharedLayer
       Policies:
