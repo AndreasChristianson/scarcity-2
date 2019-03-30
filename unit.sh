@@ -2,8 +2,14 @@
 
 set -e -o xtrace
 
+test(){
+    npm --prefix $1 install
+    npm --prefix $1 run test
+}
+
 for D in packages/*/*/; 
 do 
-    npm --prefix $D install
-    npm --prefix $D run test
+    test $D
 done
+
+test site/
