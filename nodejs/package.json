@@ -1,7 +1,6 @@
 {
   "name": "lambda-layer",
   "version": "1.0.0",
-  "license": "ISC",
   "scripts": {
     "get-version": "echo $npm_package_version"
   },
