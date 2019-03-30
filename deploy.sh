@@ -20,3 +20,5 @@ aws cloudformation deploy \
     env=$1 \
     project=scarcity \
     --no-fail-on-empty-changeset 
+
+aws s3 cp s3://scarcity-artifacts/${git_sha}/site/ s3://scarcity-site-${git_sha}/ --recursive

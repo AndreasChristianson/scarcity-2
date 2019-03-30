@@ -99,6 +99,13 @@ Resources:
       Type: A
 
 # Site
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      BucketName: !Sub scarcity-site-${EnvParameter}
+      WebsiteConfiguration:
+        IndexDocument: index.html
 
 # Wss Functions
   SharedLayer:
@@ -149,3 +156,7 @@ Outputs:
     Value: !Join [ '', [ 'wss://', !Ref ScarcityWss, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref 'Stage'] ]
   WebSocketDomain:
     Value: !Sub "wss://wss.${EnvParameter}.scarcity.${TldParameter}"
+  S3WebsiteURL:
+    Value: !GetAtt [SiteBucket, WebsiteURL]
+  S3BucketSecureURL:
+    Value: !Join ['', ['https://', !GetAtt [SiteBucket, DomainName]]]
