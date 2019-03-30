@@ -4,8 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, 'dist/js'),
-    filename: '[name]-[contenthash].js'
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'js/[name]-[contenthash].js'
   },
   module: {
     rules: [
@@ -23,7 +23,8 @@ module.exports = {
   },
   plugins:[
     new HtmlWebpackPlugin({
-      title: 'Scarcity'
-            })
+      title: 'Scarcity',
+      template: 'src/index-template.html'
+    })
   ]
 };
