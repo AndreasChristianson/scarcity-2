@@ -20,7 +20,7 @@ Parameters:
 Mappings:
   EnvMap:
     dev:
-      TargetWssDomain: d-0dvn1b4czh.execute-api.us-west-2.amazonaws.com
+      TargetWssDomain: d-vcreg6l6fe.execute-api.us-west-2.amazonaws.com
   CertMap:
     us-east-1:
       arn: arn:aws:acm:us-east-1:470576235824:certificate/dd347eb4-7688-45a2-8dbf-f09226e2f57a
@@ -51,6 +51,19 @@ Resources:
       ApiId: !Ref ScarcityWss
       IntegrationType: AWS_PROXY
       IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EchoFunction.Arn}/invocations
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ScarcityWss
+      RouteKey: $connect
+      AuthorizationType: NONE
+      Target: !Join ['/', ['integrations', !Ref ConnectIntegration]]
+  ConnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ScarcityWss
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ConnectFunction.Arn}/invocations
   Deployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
@@ -82,24 +95,24 @@ Resources:
     Type: AWS::ApiGateway::Account
     Properties: 
       CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
-  DomainMapping:
-    Type: 'AWS::ApiGateway::BasePathMapping'
-    Properties:
-      Stage: !Ref Stage
-      DomainName: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}"
-      RestApiId: !Ref ScarcityWss
-  DnsRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      AliasTarget: 
-        DNSName: !FindInMap
-          - EnvMap
-          - !Ref EnvParameter
-          - TargetWssDomain
-        HostedZoneId: Z2OJLYMUO9EFXC
-      HostedZoneName: !Sub "${TldParameter}."
-      Name: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}."
-      Type: A
+  # DomainMapping:
+  #   Type: 'AWS::ApiGateway::BasePathMapping'
+  #   Properties:
+  #     Stage: !Ref Stage
+  #     DomainName: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}"
+  #     RestApiId: !Ref ScarcityWss
+  # DnsRecord:
+  #   Type: AWS::Route53::RecordSet
+  #   Properties:
+  #     AliasTarget: 
+  #       DNSName: !FindInMap
+  #         - EnvMap
+  #         - !Ref EnvParameter
+  #         - TargetWssDomain
+  #       HostedZoneId: Z2OJLYMUO9EFXC
+  #     HostedZoneName: !Sub "${TldParameter}."
+  #     Name: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}."
+  #     Type: A
 
 # Site
   SiteBucket:
@@ -111,6 +124,7 @@ Resources:
         IndexDocument: index.html
   SiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
+    DeletionPolicy: Retain
     Properties:
       PolicyDocument:
         # Id: MyPolicy
@@ -167,7 +181,55 @@ Resources:
       HostedZoneName: !Sub "${TldParameter}."
       Name: !Sub "${EnvParameter}.scarcity.${TldParameter}."
       Type: A
-
+  WwwSiteDns:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget: 
+        DNSName: !GetAtt [SiteCloudfront, DomainName]
+        HostedZoneId: Z2FDTNDATAQYW2
+      HostedZoneName: !Sub "${TldParameter}."
+      Name: !Sub "www.${EnvParameter}.scarcity.${TldParameter}."
+      Type: A
+# tables
+  ConnectionsTable: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: 
+        - 
+          AttributeName: "ConnectionId"
+          AttributeType: "S"
+        - 
+          AttributeName: "AccountId"
+          AttributeType: "S"
+        - 
+          AttributeName: "Floor"
+          AttributeType: "S"     
+      KeySchema: 
+        - 
+          AttributeName: "ConnectionId"
+          KeyType: "HASH"
+      StreamSpecification:
+        StreamViewType: KEYS_ONLY
+      GlobalSecondaryIndexes:
+        - 
+          IndexName: "AccountIndex"
+          KeySchema: 
+            - 
+              AttributeName: "AccountId"
+              KeyType: "HASH"
+          Projection: 
+            ProjectionType: "KEYS_ONLY"
+        - 
+          IndexName: "FloorIndex"
+          KeySchema: 
+            - 
+              AttributeName: Floor
+              KeyType: HASH
+          Projection: 
+            NonKeyAttributes:
+              - "Position"
+            ProjectionType: INCLUDE
 # Wss Functions
   SharedLayer:
     Type: "AWS::Lambda::LayerVersion"
@@ -186,13 +248,6 @@ Resources:
         Key: !Sub '${GitShaParameter}/wss/echo/app.zip'
       Layers:
         - !Ref SharedLayer
-      Policies:
-      - Statement:
-        - Effect: Allow
-          Action:
-          - 'execute-api:ManageConnections'
-          Resource:
-          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ScarcityWss}/*'
   EchoPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
@@ -201,25 +256,36 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref EchoFunction
       Principal: apigateway.amazonaws.com
-  LambdaLogGroup:
-    Type: AWS::Logs::LogGroup
-    DeletionPolicy: Retain
+  ConnectFunction:
+    Type: 'AWS::Serverless::Function'
     Properties:
-      LogGroupName: !Join ["", ["/aws/lambda/", !Ref EchoFunction]]
-      RetentionInDays: 7
+      Handler: index.handler
+      Runtime: nodejs8.10
+      AutoPublishAlias: !Ref GitShaParameter
+      CodeUri:
+        Bucket: !Ref BucketNameParameter
+        Key: !Sub '${GitShaParameter}/wss/connect/app.zip'
+      Layers:
+        - !Ref SharedLayer
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ConnectionsTable
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref ConnectionsTable
+  ConnectPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - ScarcityWss
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref EchoFunction
+      Principal: apigateway.amazonaws.com
 
 Outputs:
-  EchoFunctionArn:
-    Description: "Echo function ARN"
-    Value: !GetAtt EchoFunction.Arn
   WebSocketURI:
-    Description: "Raw websocket uri"
     Value: !Join [ '', [ 'wss://', !Ref ScarcityWss, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref 'Stage'] ]
-  WebSocketDomain:
-    Value: !Sub "wss://wss.${EnvParameter}.scarcity.${TldParameter}"
-  S3WebsiteURL:
-    Value: !GetAtt [SiteBucket, WebsiteURL]
-  S3BucketSecureURL:
-    Value: !Join ['', ['https://', !GetAtt [SiteBucket, DomainName]]]
+  # WebSocketDomain:
+  #   Value: !Sub "wss://wss.${EnvParameter}.scarcity.${TldParameter}"
   StaticSite:
     Value: !Sub "${EnvParameter}.scarcity.${TldParameter}."
