@@ -21,6 +21,11 @@ Mappings:
   EnvMap:
     dev:
       TargetWssDomain: d-0dvn1b4czh.execute-api.us-west-2.amazonaws.com
+  CertMap:
+    us-east-1:
+      arn: arn:aws:acm:us-east-1:470576235824:certificate/dd347eb4-7688-45a2-8dbf-f09226e2f57a
+    us-west-2:
+      arn: arn:aws:acm:us-west-2:470576235824:certificate/cfe2707c-1378-4f1b-9c2c-90faceff2141
 
 Transform: 'AWS::Serverless-2016-10-31'
 
@@ -58,8 +63,6 @@ Resources:
       StageName: !Ref GitShaParameter
       DeploymentId: !Ref Deployment
       ApiId: !Ref ScarcityWss
-      StageVariables:
-      - gitSha: !Ref GitShaParameter
   CloudWatchRole:
     Type: AWS::IAM::Role
     Properties:
@@ -103,9 +106,64 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: PublicRead
-      BucketName: !Sub scarcity-site-${EnvParameter}
+      BucketName: !Sub scarcity-site-${GitShaParameter}
       WebsiteConfiguration:
         IndexDocument: index.html
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        # Id: MyPolicy
+        Version: 2012-10-17
+        Statement:
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Sub arn:aws:s3:::${SiteBucket}/*
+      Bucket: !Ref SiteBucket
+  SiteCloudfront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+        - DomainName: !Select [2, !Split ["/", !GetAtt SiteBucket.WebsiteURL]]
+          Id: SiteOriginId
+          CustomOriginConfig:
+            OriginProtocolPolicy: http-only
+        Enabled: 'true'
+        Aliases:
+        - !Sub "www.${EnvParameter}.scarcity.${TldParameter}"
+        - !Sub "${EnvParameter}.scarcity.${TldParameter}"
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - GET
+          - HEAD
+          - OPTIONS
+          TargetOriginId: SiteOriginId
+          Compress: True
+          MinTTL: 300
+          DefaultTTL: 300
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !FindInMap
+            - CertMap
+            - us-east-1
+            - arn
+          SslSupportMethod: sni-only
+  SiteDns:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget: 
+        DNSName: !GetAtt [SiteCloudfront, DomainName]
+        HostedZoneId: Z2FDTNDATAQYW2
+      HostedZoneName: !Sub "${TldParameter}."
+      Name: !Sub "${EnvParameter}.scarcity.${TldParameter}."
+      Type: A
 
 # Wss Functions
   SharedLayer:
@@ -122,7 +180,7 @@ Resources:
       AutoPublishAlias: !Ref GitShaParameter
       CodeUri:
         Bucket: !Ref BucketNameParameter
-        Key: !Sub '${GitShaParameter}/wss/echo.zip'
+        Key: !Sub '${GitShaParameter}/wss/echo/app.zip'
       Layers:
         - !Ref SharedLayer
       Policies:
