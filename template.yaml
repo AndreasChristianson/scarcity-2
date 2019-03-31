@@ -106,7 +106,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: PublicRead
-      BucketName: !Sub scarcity-site-${GitShaParameter}
+      BucketName: scarcity-site
       WebsiteConfiguration:
         IndexDocument: index.html
   SiteBucketPolicy:
@@ -128,6 +128,7 @@ Resources:
         Origins:
         - DomainName: !Select [2, !Split ["/", !GetAtt SiteBucket.WebsiteURL]]
           Id: SiteOriginId
+          OriginPath: !Sub /${GitShaParameter}
           CustomOriginConfig:
             OriginProtocolPolicy: http-only
         Enabled: 'true'
@@ -155,6 +156,8 @@ Resources:
             - us-east-1
             - arn
           SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.1_2016
+        HttpVersion: http2
   SiteDns:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -218,3 +221,5 @@ Outputs:
     Value: !GetAtt [SiteBucket, WebsiteURL]
   S3BucketSecureURL:
     Value: !Join ['', ['https://', !GetAtt [SiteBucket, DomainName]]]
+  StaticSite:
+    Value: !Sub "${EnvParameter}.scarcity.${TldParameter}."
