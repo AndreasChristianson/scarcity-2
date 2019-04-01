@@ -1,8 +1,6 @@
 import AWS from 'aws-sdk';
 
-const ddb = new AWS.DynamoDB({
-    apiVersion: '2012-08-10'
-});
+const ddb = new AWS.DynamoDB.DocumentClient();
 
 const sixHoursFromNow = () => Math.floor(Date.now() / 1000) + 60 * 60 * 6;
 
