@@ -1,8 +1,9 @@
 import AWS from 'aws-sdk';
+import moment from 'moment';
 
 const ddb = new AWS.DynamoDB.DocumentClient();
 
-const sixHoursFromNow = () => Math.floor(Date.now() / 1000) + 60 * 60 * 6;
+const sixHoursFromNow = () => moment().add(6, 'hours').unix();
 
 exports.handler = async (event, context) => {
     const { requestContext: { connectionId } } = event;
