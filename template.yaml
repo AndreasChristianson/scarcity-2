@@ -67,6 +67,7 @@ Resources:
   Deployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
+    - ConnectRoute
     - EchoRoute
     Properties:
       ApiId: !Ref ScarcityWss
