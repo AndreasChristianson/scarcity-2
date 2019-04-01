@@ -11,16 +11,12 @@ exports.handler = async (event, context) => {
     const putParams = {
         TableName: process.env.TABLE_NAME,
         Item: {
-            connectionId: {
-                S: connectionId 
-            },
-            ttl: {
-                N: sixHoursFromNow() 
-            }
+            connectionId,
+            ttl: sixHoursFromNow()
         }
     };
 
-    await ddb.putItem(putParams).promise();
+    await ddb.put(putParams).promise();
 
     return {
         statusCode: 200,
