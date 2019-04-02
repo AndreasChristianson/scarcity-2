@@ -118,6 +118,7 @@ Resources:
 # Site
   SiteBucket:
     Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
     Properties:
       AccessControl: PublicRead
       BucketName: scarcity-site
@@ -125,7 +126,6 @@ Resources:
         IndexDocument: index.html
   SiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
-    DeletionPolicy: Retain
     Properties:
       PolicyDocument:
         # Id: MyPolicy
