@@ -196,33 +196,36 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties: 
       BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
       AttributeDefinitions: 
         - 
-          AttributeName: "connectionId"
+          AttributeName: connectionId
           AttributeType: "S"
         - 
-          AttributeName: "accountId"
+          AttributeName: accountId
           AttributeType: "S"
         - 
-          AttributeName: "floor"
-          AttributeType: "S"     
+          AttributeName: floor
+          AttributeType: "S"   
       KeySchema: 
         - 
-          AttributeName: "connectionId"
-          KeyType: "HASH"
+          AttributeName: connectionId
+          KeyType: HASH
       StreamSpecification:
         StreamViewType: KEYS_ONLY
       GlobalSecondaryIndexes:
         - 
-          IndexName: "accountIndex"
+          IndexName: accountIndex
           KeySchema: 
             - 
-              AttributeName: "accountId"
-              KeyType: "HASH"
+              AttributeName: accountId
+              KeyType: HASH
           Projection: 
-            ProjectionType: "KEYS_ONLY"
+            ProjectionType: KEYS_ONLY
         - 
-          IndexName: "floorIndex"
+          IndexName: floorIndex
           KeySchema: 
             - 
               AttributeName: floor
@@ -233,7 +236,7 @@ Resources:
             ProjectionType: INCLUDE
 # Wss Functions
   SharedLayer:
-    Type: "AWS::Lambda::LayerVersion"
+    Type: AWS::Lambda::LayerVersion
     Properties:
       Content: 
         S3Bucket: !Ref BucketNameParameter
