@@ -19,6 +19,20 @@ aws cloudformation deploy \
     --tags \
     env=$1 \
     project=scarcity \
-    --no-fail-on-empty-changeset 
+    --no-fail-on-empty-changeset &
 
-aws s3 cp s3://scarcity-artifacts/${git_sha}/site/ s3://scarcity-site/ --recursive
+pid=$!
+
+sleep 5
+
+spin='-\|/'
+
+i=0
+while kill -0 $pid 2>/dev/null
+do
+  i=$(( (i+1) %4 ))
+  printf "\r${spin:$i:1}"
+  sleep .1
+done
+
+aws s3 sync s3://scarcity-artifacts/${git_sha}/site/ s3://scarcity-site/ --delete

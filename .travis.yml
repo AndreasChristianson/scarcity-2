@@ -17,6 +17,7 @@ jobs:
     before_script:
     - pip install --user awscli
     script: 
+    - set -e
     - ./unit.sh
     - ./build.sh
   - stage: deploy-dev
@@ -27,5 +28,6 @@ jobs:
     - pip install --user awscli
     - npm install -g wscat
     script:
+    - set -e
     - ./deploy.sh dev
     - ./smoke-test.sh dev
