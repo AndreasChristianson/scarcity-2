@@ -43,6 +43,7 @@ Resources:
     DependsOn:
     - Connect
     - Echo
+    - Disconnect
     Properties:
       ApiId: !Ref ScarcityWss
   Stage:
@@ -226,6 +227,7 @@ Resources:
         BucketNameParameter: !Ref BucketNameParameter
         SharedLayer: !Ref SharedLayer
         FunctionName: echo
+        ConnectionsTable: !Ref ConnectionsTable
   Connect:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -237,6 +239,19 @@ Resources:
         BucketNameParameter: !Ref BucketNameParameter
         SharedLayer: !Ref SharedLayer
         FunctionName: connect
+        ConnectionsTable: !Ref ConnectionsTable
+  Disconnect:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
+      Parameters:
+        ApiId: !Ref ScarcityWss
+        RouteKey: $disconnect
+        GitShaParameter: !Ref GitShaParameter
+        BucketNameParameter: !Ref BucketNameParameter
+        SharedLayer: !Ref SharedLayer
+        FunctionName: disconnect
+        ConnectionsTable: !Ref ConnectionsTable
 
 Outputs:
   WebSocketURI:

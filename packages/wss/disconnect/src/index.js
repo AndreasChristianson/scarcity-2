@@ -1,25 +1,21 @@
 import AWS from 'aws-sdk';
-import moment from 'moment';
 
 const ddb = new AWS.DynamoDB.DocumentClient();
 
-const sixHoursFromNow = () => moment().add(6, 'hours').unix();
-
 export const handler = async (event, context) => {
     const { requestContext: { connectionId } } = event;
-    const putParams = {
+    const params = {
         TableName: process.env.CONNECTIONS_TABLE_NAME,
-        Item: {
-            connectionId,
-            ttl: sixHoursFromNow()
+        Key: {
+            connectionId
         }
     };
 
-    await ddb.put(putParams).promise();
+    await ddb.delete(params).promise();
 
     return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
-        body: `Connected.`
+        body: `Disconnected.`
     };
 };
