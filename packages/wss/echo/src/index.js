@@ -1,5 +1,7 @@
 import AWS from 'aws-sdk';
 
+const ddb = new AWS.DynamoDB.DocumentClient();
+
 export const handler = async (event, context) => {
     const { echo = 'hello world!' } = JSON.parse(event.body);
     const postData = JSON.stringify(echo);
