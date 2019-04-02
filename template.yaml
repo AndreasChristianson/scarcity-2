@@ -38,37 +38,11 @@ Resources:
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.action
     DependsOn: ApiGatewayAccount
-  # EchoRoute:
-  #   Type: AWS::ApiGatewayV2::Route
-  #   Properties:
-  #     ApiId: !Ref ScarcityWss
-  #     RouteKey: echo
-  #     AuthorizationType: NONE
-  #     Target: !Join ['/', ['integrations', !Ref EchoIntegration]]
-  # EchoIntegration:
-  #   Type: AWS::ApiGatewayV2::Integration
-  #   Properties:
-  #     ApiId: !Ref ScarcityWss
-  #     IntegrationType: AWS_PROXY
-  #     IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EchoFunction.Arn}/invocations
-  ConnectRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref ScarcityWss
-      RouteKey: $connect
-      AuthorizationType: NONE
-      Target: !Join ['/', ['integrations', !Ref ConnectIntegration]]
-  ConnectIntegration:
-    Type: AWS::ApiGatewayV2::Integration
-    Properties:
-      ApiId: !Ref ScarcityWss
-      IntegrationType: AWS_PROXY
-      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ConnectFunction.Arn}/invocations
   Deployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
-    - ConnectRoute
-    - EchoFunctionStack
+    - Connect
+    - Echo
     Properties:
       ApiId: !Ref ScarcityWss
   Stage:
@@ -241,7 +215,7 @@ Resources:
       Content: 
         S3Bucket: !Ref BucketNameParameter
         S3Key: !Sub 'layer/${LayerVersionParameter}.zip'
-  EchoFunctionStack:
+  Echo:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
@@ -252,57 +226,17 @@ Resources:
         BucketNameParameter: !Ref BucketNameParameter
         SharedLayer: !Ref SharedLayer
         FunctionName: echo
-  # EchoFunction:
-  #   Type: 'AWS::Serverless::Function'
-  #   Properties:
-  #     Handler: index.handler
-  #     Runtime: nodejs8.10
-  #     AutoPublishAlias: !Ref GitShaParameter
-  #     CodeUri:
-  #       Bucket: !Ref BucketNameParameter
-  #       Key: !Sub '${GitShaParameter}/wss/echo/app.zip'
-  #     Layers:
-  #       - !Ref SharedLayer
-  #     Policies:
-  #     - Statement:
-  #       - Effect: Allow
-  #         Action:
-  #         - 'execute-api:ManageConnections'
-  #         Resource:
-  #         - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ScarcityWss}/*'
-  # EchoPermission:
-  #   Type: AWS::Lambda::Permission
-  #   DependsOn:
-  #     - ScarcityWss
-  #   Properties:
-  #     Action: lambda:InvokeFunction
-  #     FunctionName: !Ref EchoFunction
-  #     Principal: apigateway.amazonaws.com
-  ConnectFunction:
-    Type: 'AWS::Serverless::Function'
+  Connect:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      Handler: index.handler
-      Runtime: nodejs8.10
-      AutoPublishAlias: !Ref GitShaParameter
-      CodeUri:
-        Bucket: !Ref BucketNameParameter
-        Key: !Sub '${GitShaParameter}/wss/connect/app.zip'
-      Layers:
-        - !Ref SharedLayer
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref ConnectionsTable
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName: !Ref ConnectionsTable
-  ConnectPermission:
-    Type: AWS::Lambda::Permission
-    DependsOn:
-      - ScarcityWss
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref ConnectFunction
-      Principal: apigateway.amazonaws.com
+      TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
+      Parameters:
+        ApiId: !Ref ScarcityWss
+        RouteKey: $connect
+        GitShaParameter: !Ref GitShaParameter
+        BucketNameParameter: !Ref BucketNameParameter
+        SharedLayer: !Ref SharedLayer
+        FunctionName: connect
 
 Outputs:
   WebSocketURI:
