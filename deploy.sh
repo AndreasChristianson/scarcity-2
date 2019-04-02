@@ -11,7 +11,7 @@ aws cloudformation validate-template \
 aws cloudformation deploy \
     --template-file template.yaml \
     --stack-name scarcity-$1 \
-    --capabilities CAPABILITY_IAM \
+    --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
     --parameter-overrides \
     "GitShaParameter=$git_sha" \
     "LayerVersionParameter=$layer_version" \
@@ -21,4 +21,4 @@ aws cloudformation deploy \
     project=scarcity \
     --no-fail-on-empty-changeset 
 
-aws s3 cp s3://scarcity-artifacts/${git_sha}/site/ s3://scarcity-site/${git_sha}/ --recursive
+aws s3 cp s3://scarcity-artifacts/${git_sha}/site/ s3://scarcity-site/ --recursive

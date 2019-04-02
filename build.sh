@@ -49,3 +49,5 @@ cd ..
 npm --prefix site install
 npm --prefix site run build
 aws s3 cp site/dist s3://scarcity-artifacts/${git_sha}/site/ --recursive
+
+aws s3 cp templates s3://scarcity-artifacts/${git_sha}/templates/ --recursive
