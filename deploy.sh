@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e -o xtrace
+set -e -x
 
 layer_version=$(npm --prefix nodejs --silent run get-version)
 git_sha=$(git rev-parse --short HEAD)
@@ -25,8 +25,8 @@ pid=$!
 
 sleep 5
 
+set +x
 spin='-\|/'
-
 i=0
 while kill -0 $pid 2>/dev/null
 do
@@ -34,5 +34,7 @@ do
   printf "\r${spin:$i:1}"
   sleep .1
 done
+set -x
+wait "${pid}"
 
 aws s3 sync s3://scarcity-artifacts/${git_sha}/site/ s3://scarcity-site/ --delete

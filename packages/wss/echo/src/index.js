@@ -10,7 +10,7 @@ export const handler = async (event, context) => {
     });
 
     const scanParams = {
-        TableName: CONNECTIONS_TABLE_NAME,
+        TableName: process.env.CONNECTIONS_TABLE_NAME,
         ProjectionExpression: 'connectionId'
     };
 

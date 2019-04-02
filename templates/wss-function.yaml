@@ -49,10 +49,10 @@ Resources:
         - !Ref SharedLayer
       Policies:
       - DynamoDBCrudPolicy:
-        TableName: !Ref ConnectionsTable
+          TableName: !Ref ConnectionsTable
       - DynamoDBStreamReadPolicy:
-        TableName: !Ref ConnectionsTable
-        StreamName: '*'
+          TableName: !Ref ConnectionsTable
+          StreamName: '*'
       - Statement:
         - Effect: Allow
           Action:
