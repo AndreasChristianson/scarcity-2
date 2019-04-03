@@ -1,5 +1,5 @@
 import React from "react";
-import {getWssUrl} from './services/wss/url-fetch-helper';
+import {getWssUrl} from './services/wss/get-wss-url';
 
 const App = async () =>
     <div className="App">

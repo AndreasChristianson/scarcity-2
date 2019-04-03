@@ -18,7 +18,18 @@ module.exports = {
         test: /\.(js|jsx)$/,
         exclude: /(node_modules)/,
         loader: "babel-loader",
-        options: { presets: ["@babel/env"] }
+        options: { 
+          presets: [
+            [
+              "@babel/env",
+              {
+                targets: "> 2%, not dead",
+                useBuiltIns: "usage",
+                corejs: 3
+              }
+            ] 
+          ]
+        }
       },
       {
         test: /\.css$/,

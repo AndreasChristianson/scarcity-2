@@ -4,19 +4,21 @@ import Chance from 'chance';
 
 import App from '../src/App';
 
+jest.mock('../src/services/wss/get-wss-url');
+
 describe('App', ()=>{
     const chance = new Chance();
     let result;
 
-    const render = () => {
+    const render = async () => {
         const renderer = new ShallowRenderer();
         renderer.render(<App />);
-        result = renderer.getRenderOutput();
+        result = await renderer.getRenderOutput();
     };
     
-    beforeEach(()=>{
+    beforeEach(async ()=>{
         global.__COMMIT_HASH__ = chance.guid();
-        render();
+        await render();
     });
 
     it('should be a div', ()=>{
