@@ -46,3 +46,4 @@ getOutput () {
 }
 
 aws apigatewayv2 create-deployment --api-id $(getOutput WssApiId) --stage-name ${git_sha}
+sleep 5
