@@ -39,11 +39,11 @@ done
 set -x
 wait "${pid}"
 
-aws s3 sync s3://scarcity-artifacts/${git_sha}/site/ s3://scarcity-site-dev/ --delete
-
 getOutput () {
     aws cloudformation describe-stacks  --stack-name scarcity-$env | jq --raw-output ".Stacks[0].Outputs[] | select(.OutputKey == \"$1\") | .OutputValue"
 }
 
+aws s3 sync s3://scarcity-artifacts/${git_sha}/site/ s3://scarcity-site-$env/ --delete
+echo \"$(getOutput WebSocketURI)\" | aws s3 cp - s3://scarcity-site-$env/wss-url.json
 aws apigatewayv2 create-deployment --api-id $(getOutput WssApiId) --stage-name ${git_sha}
 sleep 5
