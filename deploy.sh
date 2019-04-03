@@ -44,6 +44,6 @@ getOutput () {
 }
 
 aws s3 sync s3://scarcity-artifacts/${git_sha}/site/ s3://scarcity-site-$env/ --delete
-echo \"$(getOutput WebSocketURI)\" | aws s3 cp - s3://scarcity-site-$env/wss-url.json
+echo \"$(getOutput WebSocketURI)\" | aws s3 cp - s3://scarcity-site-$env/wss-url --content-type application/json
 aws apigatewayv2 create-deployment --api-id $(getOutput WssApiId) --stage-name ${git_sha}
 sleep 5
