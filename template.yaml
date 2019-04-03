@@ -16,6 +16,9 @@ Parameters:
   TldParameter:
     Type: String
     Default: pessimistic-it.com
+  ProjectParameter:
+    Type: String
+    Default: scarcity
 
 Mappings:
   EnvMap:
@@ -30,101 +33,39 @@ Mappings:
 Transform: 'AWS::Serverless-2016-10-31'
 
 Resources:
-# Wss Api
-  ScarcityWss:
+  WssApi:
     Type: 'AWS::ApiGatewayV2::Api'
     Properties:
-      Name: !Sub "scarcity-${EnvParameter}"
+      Name: !Sub ${ProjectParameter}-${EnvParameter}
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.action
-    DependsOn: ApiGatewayAccount
-  Deployment:
+  WssDeployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
     - Connect
     - Echo
     - Disconnect
     Properties:
-      ApiId: !Ref ScarcityWss
-  Stage:
+      ApiId: !Ref WssApi
+  WssStage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
       StageName: !Ref GitShaParameter
-      DeploymentId: !Ref Deployment
-      ApiId: !Ref ScarcityWss
-  CloudWatchRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Action:
-            - sts:AssumeRole
-          Effect: "Allow"
-          Principal:
-            Service:
-              - "apigateway.amazonaws.com"
-        Version: '2012-10-17'
-      Path: /
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
-  ApiGatewayAccount: 
-    Type: AWS::ApiGateway::Account
-    Properties: 
-      CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
-  # DomainMapping:
-  #   Type: 'AWS::ApiGateway::BasePathMapping'
-  #   Properties:
-  #     Stage: !Ref Stage
-  #     DomainName: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}"
-  #     RestApiId: !Ref ScarcityWss
-  # DnsRecord:
-  #   Type: AWS::Route53::RecordSet
-  #   Properties:
-  #     AliasTarget: 
-  #       DNSName: !FindInMap
-  #         - EnvMap
-  #         - !Ref EnvParameter
-  #         - TargetWssDomain
-  #       HostedZoneId: Z2OJLYMUO9EFXC
-  #     HostedZoneName: !Sub "${TldParameter}."
-  #     Name: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}."
-  #     Type: A
-
-# Site
-  SiteBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      AccessControl: PublicRead
-      BucketName: scarcity-site
-      WebsiteConfiguration:
-        IndexDocument: index.html
-  SiteBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      PolicyDocument:
-        # Id: MyPolicy
-        Version: 2012-10-17
-        Statement:
-            Effect: Allow
-            Principal: '*'
-            Action: 's3:GetObject'
-            Resource: !Sub arn:aws:s3:::${SiteBucket}/*
-      Bucket: !Ref SiteBucket
+      ApiId: !Ref WssApi
+      DeploymentId: !Ref WssDeployment
   SiteCloudfront:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
         Origins:
-        - DomainName: !Select [2, !Split ["/", !GetAtt SiteBucket.WebsiteURL]]
+        - DomainName: !Sub ${ProjectParameter}-site-${EnvParameter}.s3-website-${AWS::Region}.amazonaws.com
           Id: SiteOriginId
-          # OriginPath: !Sub /${GitShaParameter}
           CustomOriginConfig:
             OriginProtocolPolicy: http-only
         Enabled: 'true'
         Aliases:
-        - !Sub "www.${EnvParameter}.scarcity.${TldParameter}"
-        - !Sub "${EnvParameter}.scarcity.${TldParameter}"
+        - !Sub "www.${EnvParameter}.${ProjectParameter}.${TldParameter}"
+        - !Sub "${EnvParameter}.${ProjectParameter}.${TldParameter}"
         DefaultCacheBehavior:
           AllowedMethods:
           - GET
@@ -155,7 +96,7 @@ Resources:
         DNSName: !GetAtt [SiteCloudfront, DomainName]
         HostedZoneId: Z2FDTNDATAQYW2
       HostedZoneName: !Sub "${TldParameter}."
-      Name: !Sub "${EnvParameter}.scarcity.${TldParameter}."
+      Name: !Sub "${EnvParameter}.${ProjectParameter}.${TldParameter}."
       Type: A
   WwwSiteDns:
     Type: AWS::Route53::RecordSet
@@ -164,7 +105,7 @@ Resources:
         DNSName: !GetAtt [SiteCloudfront, DomainName]
         HostedZoneId: Z2FDTNDATAQYW2
       HostedZoneName: !Sub "${TldParameter}."
-      Name: !Sub "www.${EnvParameter}.scarcity.${TldParameter}."
+      Name: !Sub "www.${EnvParameter}.${ProjectParameter}.${TldParameter}."
       Type: A
 # tables
   ConnectionsTable: 
@@ -221,7 +162,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
       Parameters:
-        ApiId: !Ref ScarcityWss
+        ApiId: !Ref WssApi
         RouteKey: echo
         GitShaParameter: !Ref GitShaParameter
         BucketNameParameter: !Ref BucketNameParameter
@@ -233,7 +174,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
       Parameters:
-        ApiId: !Ref ScarcityWss
+        ApiId: !Ref WssApi
         RouteKey: $connect
         GitShaParameter: !Ref GitShaParameter
         BucketNameParameter: !Ref BucketNameParameter
@@ -245,7 +186,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
       Parameters:
-        ApiId: !Ref ScarcityWss
+        ApiId: !Ref WssApi
         RouteKey: $disconnect
         GitShaParameter: !Ref GitShaParameter
         BucketNameParameter: !Ref BucketNameParameter
@@ -255,8 +196,10 @@ Resources:
 
 Outputs:
   WebSocketURI:
-    Value: !Join [ '', [ 'wss://', !Ref ScarcityWss, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref 'Stage'] ]
-  # WebSocketDomain:
-  #   Value: !Sub "wss://wss.${EnvParameter}.scarcity.${TldParameter}"
+    Value: !Join [ '', [ 'wss://', !Ref WssApi, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref GitShaParameter] ]
   StaticSite:
-    Value: !Sub "${EnvParameter}.scarcity.${TldParameter}."
+    Value: !Sub "${EnvParameter}.${ProjectParameter}.${TldParameter}."
+  WssApiId:
+    Value: !Ref WssApi
+  WssStageId:
+    Value: !Ref WssStage

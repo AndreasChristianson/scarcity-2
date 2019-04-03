@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-set -e -o xtrace
+set -e
+
 env=$1
 getOutput () {
     aws cloudformation describe-stacks  --stack-name scarcity-$env | jq --raw-output ".Stacks[0].Outputs[] | select(.OutputKey == \"$1\") | .OutputValue"
