@@ -23,7 +23,7 @@ Parameters:
 Mappings:
   EnvMap:
     dev:
-      TargetWssDomain: d-vcreg6l6fe.execute-api.us-west-2.amazonaws.com
+      TargetWssDomain: d-jv0n5bsrua.execute-api.us-west-2.amazonaws.com
   CertMap:
     us-east-1:
       arn: arn:aws:acm:us-east-1:470576235824:certificate/dd347eb4-7688-45a2-8dbf-f09226e2f57a
@@ -39,18 +39,18 @@ Resources:
       Name: !Sub ${ProjectParameter}-${EnvParameter}
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.action
-  WssDeployment:
-    Type: AWS::ApiGatewayV2::Deployment
-    DependsOn:
-    - Connect
-    - Echo
-    - Disconnect
-    Properties:
-      ApiId: !Ref WssApi
+  # WssDeployment:
+  #   Type: AWS::ApiGatewayV2::Deployment
+  #   DependsOn:
+  #   - Connect
+  #   - Echo
+  #   - Disconnect
+  #   Properties:
+  #     ApiId: !Ref WssApi
   WssStage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
-      StageName: !Ref GitShaParameter
+      StageName: !Ref EnvParameter
       ApiId: !Ref WssApi
       DeploymentId: !Ref WssDeployment
   SiteCloudfront:
@@ -106,6 +106,24 @@ Resources:
         HostedZoneId: Z2FDTNDATAQYW2
       HostedZoneName: !Sub "${TldParameter}."
       Name: !Sub "www.${EnvParameter}.${ProjectParameter}.${TldParameter}."
+      Type: A
+  DomainMapping:
+    Type: 'AWS::ApiGateway::BasePathMapping'
+    Properties:
+      Stage: !Ref WssStage
+      DomainName: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}"
+      RestApiId: !Ref WssApi
+  DnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !FindInMap
+          - EnvMap
+          - !Ref EnvParameter
+          - TargetWssDomain
+        HostedZoneId: Z2OJLYMUO9EFXC
+      HostedZoneName: !Sub "${TldParameter}."
+      Name: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}."
       Type: A
 # tables
   ConnectionsTable: 
@@ -196,7 +214,7 @@ Resources:
 
 Outputs:
   WebSocketURI:
-    Value: !Join [ '', [ 'wss://', !Ref WssApi, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref GitShaParameter] ]
+    Value: !Join [ '', [ 'wss://', !Ref WssApi, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref EnvParameter] ]
   StaticSite:
     Value: !Sub "${EnvParameter}.${ProjectParameter}.${TldParameter}."
   WssApiId:
