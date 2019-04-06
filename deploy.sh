@@ -49,4 +49,3 @@ aws apigatewayv2 create-deployment \
   --api-id $(getOutput WssApiId) \ 
   --stage-name $env \ 
   --description ${git_sha}
-sleep 5

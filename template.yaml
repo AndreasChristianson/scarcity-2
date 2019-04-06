@@ -39,20 +39,6 @@ Resources:
       Name: !Sub ${ProjectParameter}-${EnvParameter}
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.action
-  # WssDeployment:
-  #   Type: AWS::ApiGatewayV2::Deployment
-  #   DependsOn:
-  #   - Connect
-  #   - Echo
-  #   - Disconnect
-  #   Properties:
-  #     ApiId: !Ref WssApi
-  WssStage:
-    Type: AWS::ApiGatewayV2::Stage
-    Properties:
-      StageName: !Ref EnvParameter
-      ApiId: !Ref WssApi
-      DeploymentId: !Ref WssDeployment
   SiteCloudfront:
     Type: AWS::CloudFront::Distribution
     Properties:
