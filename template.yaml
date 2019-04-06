@@ -93,24 +93,24 @@ Resources:
       HostedZoneName: !Sub "${TldParameter}."
       Name: !Sub "www.${EnvParameter}.${ProjectParameter}.${TldParameter}."
       Type: A
-  DomainMapping:
-    Type: 'AWS::ApiGateway::BasePathMapping'
-    Properties:
-      Stage: !Ref WssStage
-      DomainName: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}"
-      RestApiId: !Ref WssApi
-  DnsRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      AliasTarget:
-        DNSName: !FindInMap
-          - EnvMap
-          - !Ref EnvParameter
-          - TargetWssDomain
-        HostedZoneId: Z2OJLYMUO9EFXC
-      HostedZoneName: !Sub "${TldParameter}."
-      Name: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}."
-      Type: A
+  # DomainMapping:
+  #   Type: 'AWS::ApiGateway::BasePathMapping'
+  #   Properties:
+  #     Stage: !Ref WssStage
+  #     DomainName: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}"
+  #     RestApiId: !Ref WssApi
+  # DnsRecord:
+  #   Type: AWS::Route53::RecordSet
+  #   Properties:
+  #     AliasTarget:
+  #       DNSName: !FindInMap
+  #         - EnvMap
+  #         - !Ref EnvParameter
+  #         - TargetWssDomain
+  #       HostedZoneId: Z2OJLYMUO9EFXC
+  #     HostedZoneName: !Sub "${TldParameter}."
+  #     Name: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}."
+  #     Type: A
 # tables
   ConnectionsTable: 
     Type: AWS::DynamoDB::Table
