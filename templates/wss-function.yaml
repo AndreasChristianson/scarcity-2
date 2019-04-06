@@ -38,7 +38,7 @@ Resources:
       Handler: index.handler
       Runtime: nodejs8.10
       AutoPublishAlias: !Ref GitShaParameter
-      # FunctionName: !Ref FunctionName
+      FunctionName: !Ref FunctionName
       Environment:
         Variables:
           CONNECTIONS_TABLE_NAME: !Ref ConnectionsTable
