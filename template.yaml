@@ -93,11 +93,17 @@ Resources:
       HostedZoneName: !Sub "${TldParameter}."
       Name: !Sub "www.${EnvParameter}.${ProjectParameter}.${TldParameter}."
       Type: A
+  WssDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    Properties:
+      Description: for domain mapping
+      ApiId: !Ref WssApi
   WssStage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
       StageName: !Ref EnvParameter
       ApiId: !Ref WssApi
+      DeploymentId: !Ref WssDeployment
   DomainMapping:
     Type: 'AWS::ApiGateway::BasePathMapping'
     Properties:
