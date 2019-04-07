@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  EnvParameter:
+    Type: String
+    AllowedValues: 
+      - dev
+      - prod
+  TldParameter:
+    Type: String
+    Default: pessimistic-it.com
+  ProjectParameter:
+    Type: String
+    Default: scarcity
+
+Mappings:
+  EnvMap:
+    dev:
+      TargetWssDomain: d-1qvxwk1fxl.execute-api.us-west-2.amazonaws.com
+  CertMap:
+    us-east-1:
+      arn: arn:aws:acm:us-east-1:470576235824:certificate/dd347eb4-7688-45a2-8dbf-f09226e2f57a
+    us-west-2:
+      arn: arn:aws:acm:us-west-2:470576235824:certificate/81cf3c30-327d-445b-993e-79006fd8b3de
+
+Transform: 'AWS::Serverless-2016-10-31'
+
+Resources:
+  WssApi:
+    Type: 'AWS::ApiGatewayV2::Api'
+    Properties:
+      Name: !Sub ${ProjectParameter}-${EnvParameter}
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: $request.body.action
+  WssDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    Properties:
+      Description: for domain mapping
+      ApiId: !Ref WssApi
+  WssStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: !Ref EnvParameter
+      ApiId: !Ref WssApi
+      DeploymentId: !Ref WssDeployment
+  DomainMapping:
+    Type: 'AWS::ApiGateway::BasePathMapping'
+    Properties:
+      Stage: !Ref WssStage
+      DomainName: !Sub "wss.${EnvParameter}.${ProjectParameter}.${TldParameter}"
+      RestApiId: !Ref WssApi
+  DnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !FindInMap
+          - EnvMap
+          - !Ref EnvParameter
+          - TargetWssDomain
+        HostedZoneId: Z2OJLYMUO9EFXC
+      HostedZoneName: !Sub "${TldParameter}."
+      Name: !Sub "wss.${EnvParameter}.${ProjectParameter}.${TldParameter}."
+      Type: A
+# Wss Functions
+
+Outputs:
+  WssApiId:
+    Value: !Ref WssApi
+  WssStageId:
+    Value: !Ref WssStage

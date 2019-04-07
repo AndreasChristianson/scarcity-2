@@ -34,11 +34,13 @@ Transform: 'AWS::Serverless-2016-10-31'
 
 Resources:
   WssApi:
-    Type: 'AWS::ApiGatewayV2::Api'
+    Type: AWS::CloudFormation::Stack
     Properties:
-      Name: !Sub ${ProjectParameter}-${EnvParameter}
-      ProtocolType: WEBSOCKET
-      RouteSelectionExpression: $request.body.action
+      TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-api.yaml
+      Parameters:
+        EnvParameter: !Ref EnvParameter
+        TldParameter: !Ref TldParameter
+        ProjectParameter: !Ref ProjectParameter
   SiteCloudfront:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -92,35 +94,6 @@ Resources:
         HostedZoneId: Z2FDTNDATAQYW2
       HostedZoneName: !Sub "${TldParameter}."
       Name: !Sub "www.${EnvParameter}.${ProjectParameter}.${TldParameter}."
-      Type: A
-  WssDeployment:
-    Type: AWS::ApiGatewayV2::Deployment
-    Properties:
-      Description: for domain mapping
-      ApiId: !Ref WssApi
-  WssStage:
-    Type: AWS::ApiGatewayV2::Stage
-    Properties:
-      StageName: !Ref EnvParameter
-      ApiId: !Ref WssApi
-      DeploymentId: !Ref WssDeployment
-  DomainMapping:
-    Type: 'AWS::ApiGateway::BasePathMapping'
-    Properties:
-      Stage: !Ref WssStage
-      DomainName: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}"
-      RestApiId: !Ref WssApi
-  DnsRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      AliasTarget:
-        DNSName: !FindInMap
-          - EnvMap
-          - !Ref EnvParameter
-          - TargetWssDomain
-        HostedZoneId: Z2OJLYMUO9EFXC
-      HostedZoneName: !Sub "${TldParameter}."
-      Name: !Sub "wss.${EnvParameter}.scarcity.${TldParameter}."
       Type: A
 # tables
   ConnectionsTable: 
@@ -177,7 +150,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
       Parameters:
-        ApiId: !Ref WssApi
+        ApiId: !GetAtt [WssApi, WssApiId]
         RouteKey: echo
         GitShaParameter: !Ref GitShaParameter
         BucketNameParameter: !Ref BucketNameParameter
@@ -189,7 +162,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
       Parameters:
-        ApiId: !Ref WssApi
+        ApiId: !GetAtt [WssApi, WssApiId]
         RouteKey: $connect
         GitShaParameter: !Ref GitShaParameter
         BucketNameParameter: !Ref BucketNameParameter
@@ -201,7 +174,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
       Parameters:
-        ApiId: !Ref WssApi
+        ApiId: !GetAtt [WssApi, WssApiId]
         RouteKey: $disconnect
         GitShaParameter: !Ref GitShaParameter
         BucketNameParameter: !Ref BucketNameParameter
@@ -211,10 +184,10 @@ Resources:
 
 Outputs:
   WebSocketURI:
-    Value: !Join [ '', [ 'wss://', !Ref WssApi, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref EnvParameter] ]
+    Value: !Join [ '', [ 'wss://', !GetAtt [WssApi, WssApiId], '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref EnvParameter] ]
   StaticSite:
     Value: !Sub "${EnvParameter}.${ProjectParameter}.${TldParameter}."
   WssApiId:
-    Value: !Ref WssApi
+    Value: !GetAtt [WssApi, WssApiId]
   WssStageId:
     Value: !Ref WssStage
