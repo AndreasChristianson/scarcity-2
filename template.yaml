@@ -190,4 +190,4 @@ Outputs:
   WssApiId:
     Value: !GetAtt [WssApi, Outputs.WssApiId]
   WssStageId:
-    Value: !Ref WssStage
+    Value: !GetAtt [WssApi, Outputs.WssStageId]
