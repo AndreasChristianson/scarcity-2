@@ -150,7 +150,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
       Parameters:
-        ApiId: !GetAtt [WssApi, WssApiId]
+        ApiId: !GetAtt [WssApi, Outputs.WssApiId]
         RouteKey: echo
         GitShaParameter: !Ref GitShaParameter
         BucketNameParameter: !Ref BucketNameParameter
@@ -162,7 +162,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
       Parameters:
-        ApiId: !GetAtt [WssApi, WssApiId]
+        ApiId: !GetAtt [WssApi, Outputs.WssApiId]
         RouteKey: $connect
         GitShaParameter: !Ref GitShaParameter
         BucketNameParameter: !Ref BucketNameParameter
@@ -174,7 +174,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
       Parameters:
-        ApiId: !GetAtt [WssApi, WssApiId]
+        ApiId: !GetAtt [WssApi, Outputs.WssApiId]
         RouteKey: $disconnect
         GitShaParameter: !Ref GitShaParameter
         BucketNameParameter: !Ref BucketNameParameter
@@ -184,10 +184,10 @@ Resources:
 
 Outputs:
   WebSocketURI:
-    Value: !Join [ '', [ 'wss://', !GetAtt [WssApi, WssApiId], '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref EnvParameter] ]
+    Value: !Join [ '', [ 'wss://', !GetAtt [WssApi, Outputs.WssApiId], '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref EnvParameter] ]
   StaticSite:
     Value: !Sub "${EnvParameter}.${ProjectParameter}.${TldParameter}."
   WssApiId:
-    Value: !GetAtt [WssApi, WssApiId]
+    Value: !GetAtt [WssApi, Outputs.WssApiId]
   WssStageId:
     Value: !Ref WssStage
