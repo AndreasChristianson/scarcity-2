@@ -1,20 +1,17 @@
 {
   "name": "scarcity-site",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "jest --coverage",
     "prebuild": "rm -rf dist",
-    "build": "webpack --mode=\"production\" --config webpack.config.js",
-    "postbuild": "cp static/* dist/"
+    "build": "npm run rawbuild -- --mode=\"production\"",
+    "dev": "nodemon --exec npm run build:dev --ignore dist/ --ignore coverage/",
+    "build:dev": "npm run rawbuild -- --mode=\"development\"",
+    "rawbuild": "webpack --config webpack.config.js",
+    "postrawbuild": "cp static/* dist/"
   },
-  "author": "",
   "dependencies": {
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6"
-  },
-  "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.4.0",
     "@babel/polyfill": "^7.4.3",
@@ -26,7 +23,12 @@
     "css-loader": "^2.1.1",
     "html-webpack-plugin": "^3.2.0",
     "jest": "^24.5.0",
+    "nodemon": "^1.18.10",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-redux": "^6.0.1",
     "react-test-renderer": "^16.8.6",
+    "redux": "^4.0.1",
     "style-loader": "^0.23.1",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
