@@ -23,7 +23,7 @@ Parameters:
 Mappings:
   EnvMap:
     dev:
-      TargetWssDomain: d-1qvxwk1fxl.execute-api.us-west-2.amazonaws.com
+      TargetWssDomain: d-frrhd55z1l.execute-api.us-west-2.amazonaws.com
   CertMap:
     us-east-1:
       arn: arn:aws:acm:us-east-1:470576235824:certificate/dd347eb4-7688-45a2-8dbf-f09226e2f57a
@@ -45,17 +45,25 @@ Resources:
       Stage: !Ref WssStage
       DomainName: !Sub "wss.${EnvParameter}.${ProjectParameter}.${TldParameter}"
       RestApiId: !Ref WssApi
+  CustomDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !Sub "wss.${EnvParameter}.${ProjectParameter}.${TldParameter}"
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      RegionalCertificateArn: !FindInMap
+          - CertMap
+          - us-west-2
+          - arn
   DnsRecord:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
-        DNSName: !FindInMap
-          - EnvMap
-          - !Ref EnvParameter
-          - TargetWssDomain
-        HostedZoneId: Z2OJLYMUO9EFXC
+        DNSName: !GetAtt [CustomDomainName, RegionalDomainName]
+        HostedZoneId: !GetAtt [CustomDomainName, RegionalHostedZoneId]
       HostedZoneName: !Sub "${TldParameter}."
-      Name: !Sub "wss.${EnvParameter}.${ProjectParameter}.${TldParameter}."
+      Name: !Ref CustomDomainName
       Type: A
   WssDeployment:
     Type: AWS::ApiGatewayV2::Deployment
@@ -63,6 +71,7 @@ Resources:
     - Echo
     - Disconnect
     - Connect
+    - DnsRecord
     Properties:
       Description: for domain mapping
       ApiId: !Ref WssApi
@@ -74,7 +83,7 @@ Resources:
       DeploymentId: !Ref WssDeployment
   SiteCloudfront:
     Type: AWS::CloudFront::Distribution
-    DependsOn: WssApi
+    DependsOn: WssDeployment
     Properties:
       DistributionConfig:
         Origins:
