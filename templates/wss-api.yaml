@@ -32,17 +32,6 @@ Resources:
       Name: !Sub ${ProjectParameter}-${EnvParameter}
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.action
-  WssDeployment:
-    Type: AWS::ApiGatewayV2::Deployment
-    Properties:
-      Description: for domain mapping
-      ApiId: !Ref WssApi
-  WssStage:
-    Type: AWS::ApiGatewayV2::Stage
-    Properties:
-      StageName: !Ref EnvParameter
-      ApiId: !Ref WssApi
-      DeploymentId: !Ref WssDeployment
   DomainMapping:
     Type: 'AWS::ApiGateway::BasePathMapping'
     Properties:
@@ -66,5 +55,3 @@ Resources:
 Outputs:
   WssApiId:
     Value: !Ref WssApi
-  WssStageId:
-    Value: !Ref WssStage

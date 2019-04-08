@@ -43,6 +43,7 @@ Resources:
         ProjectParameter: !Ref ProjectParameter
   SiteCloudfront:
     Type: AWS::CloudFront::Distribution
+    DependsOn: WssDeployment
     Properties:
       DistributionConfig:
         Origins:
@@ -182,6 +183,21 @@ Resources:
         FunctionName: disconnect
         ConnectionsTable: !Ref ConnectionsTable
 
+  WssDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+    - Disconnect
+    - Echo
+    - Connect
+    Properties:
+      Description: for domain mapping
+      ApiId: !GetAtt [WssApi, Outputs.WssApiId]
+  WssStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: !Ref EnvParameter
+      ApiId: !GetAtt [WssApi, Outputs.WssApiId]
+      DeploymentId: !Ref WssDeployment
 Outputs:
   WebSocketURI:
     Value: !Join [ '', [ 'wss://', !GetAtt [WssApi, Outputs.WssApiId], '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref EnvParameter] ]
@@ -190,4 +206,4 @@ Outputs:
   WssApiId:
     Value: !GetAtt [WssApi, Outputs.WssApiId]
   WssStageId:
-    Value: !GetAtt [WssApi, Outputs.WssStageId]
+    Value: !Ref WssStage
