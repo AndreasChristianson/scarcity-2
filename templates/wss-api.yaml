@@ -70,3 +70,5 @@ Resources:
 Outputs:
   WssApiId:
     Value: !Ref WssApi
+  WssStageId:
+    Value: !Ref WssStage
