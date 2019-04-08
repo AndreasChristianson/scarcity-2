@@ -5,7 +5,7 @@ const ddb = new AWS.DynamoDB.DocumentClient();
 export const handler = async (event, context) => {
     const { requestContext: { connectionId } } = event;
     const params = {
-        TableName: process.env.CONNECTIONS_TABLE_NAME,
+        TableName: 'Connections',
         Key: {
             connectionId
         }

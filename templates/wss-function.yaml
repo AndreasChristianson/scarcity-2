@@ -13,8 +13,6 @@ Parameters:
     Type: String
   FunctionName:
     Type: String
-  ConnectionsTable:
-    Type: String
 
 Transform: 'AWS::Serverless-2016-10-31'
 
@@ -38,9 +36,6 @@ Resources:
       Runtime: nodejs8.10
       AutoPublishAlias: !Ref GitShaParameter
       FunctionName: !Ref FunctionName
-      Environment:
-        Variables:
-          CONNECTIONS_TABLE_NAME: !Ref ConnectionsTable
       CodeUri:
         Bucket: !Ref BucketNameParameter
         Key: !Sub '${GitShaParameter}/wss/${FunctionName}/app.zip'
@@ -48,9 +43,9 @@ Resources:
         - !Ref SharedLayer
       Policies:
       - DynamoDBCrudPolicy:
-          TableName: !Ref ConnectionsTable
+          TableName: '*'
       - DynamoDBStreamReadPolicy:
-          TableName: !Ref ConnectionsTable
+          TableName: '*'
           StreamName: '*'
       - Statement:
         - Effect: Allow

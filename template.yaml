@@ -23,7 +23,8 @@ Parameters:
 Mappings:
   EnvMap:
     dev:
-      TargetWssDomain: d-frrhd55z1l.execute-api.us-west-2.amazonaws.com
+      TargetWssDomain: d-c41e15ymx5.execute-api.us-west-2.amazonaws.com
+      RegionId: Z2OJLYMUO9EFXC
   CertMap:
     us-east-1:
       arn: arn:aws:acm:us-east-1:470576235824:certificate/dd347eb4-7688-45a2-8dbf-f09226e2f57a
@@ -45,25 +46,20 @@ Resources:
       Stage: !Ref WssStage
       DomainName: !Sub "wss.${EnvParameter}.${ProjectParameter}.${TldParameter}"
       RestApiId: !Ref WssApi
-  CustomDomainName:
-    Type: AWS::ApiGateway::DomainName
-    Properties:
-      DomainName: !Sub "wss.${EnvParameter}.${ProjectParameter}.${TldParameter}"
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
-      RegionalCertificateArn: !FindInMap
-          - CertMap
-          - us-west-2
-          - arn
   DnsRecord:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
-        DNSName: !GetAtt [CustomDomainName, RegionalDomainName]
-        HostedZoneId: !GetAtt [CustomDomainName, RegionalHostedZoneId]
+        DNSName: !FindInMap
+          - EnvMap
+          - !Ref EnvParameter
+          - TargetWssDomain
+        HostedZoneId: !FindInMap
+          - EnvMap
+          - !Ref EnvParameter
+          - RegionId
       HostedZoneName: !Sub "${TldParameter}."
-      Name: !Ref CustomDomainName
+      Name: !Sub "wss.${EnvParameter}.${ProjectParameter}.${TldParameter}"
       Type: A
   WssDeployment:
     Type: AWS::ApiGatewayV2::Deployment
@@ -140,6 +136,7 @@ Resources:
   ConnectionsTable: 
     Type: AWS::DynamoDB::Table
     Properties: 
+      TableName: Connections
       BillingMode: PAY_PER_REQUEST
       TimeToLiveSpecification:
         AttributeName: ttl
@@ -197,7 +194,6 @@ Resources:
         BucketNameParameter: !Ref BucketNameParameter
         SharedLayer: !Ref SharedLayer
         FunctionName: echo
-        ConnectionsTable: !Ref ConnectionsTable
   Connect:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -209,7 +205,6 @@ Resources:
         BucketNameParameter: !Ref BucketNameParameter
         SharedLayer: !Ref SharedLayer
         FunctionName: connect
-        ConnectionsTable: !Ref ConnectionsTable
   Disconnect:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -221,7 +216,6 @@ Resources:
         BucketNameParameter: !Ref BucketNameParameter
         SharedLayer: !Ref SharedLayer
         FunctionName: disconnect
-        ConnectionsTable: !Ref ConnectionsTable
 Outputs:
   WebSocketURI:
     Value: !Join [ '', [ 'wss://', !Ref WssApi, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref EnvParameter] ]

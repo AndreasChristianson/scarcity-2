@@ -8,7 +8,7 @@ const sixHoursFromNow = () => moment().add(6, 'hours').unix();
 export const handler = async (event, context) => {
     const { requestContext: { connectionId } } = event;
     const putParams = {
-        TableName: process.env.CONNECTIONS_TABLE_NAME,
+        TableName: 'Connections',
         Item: {
             connectionId,
             ttl: sixHoursFromNow()
