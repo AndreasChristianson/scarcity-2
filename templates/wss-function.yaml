@@ -15,7 +15,6 @@ Parameters:
     Type: String
   ConnectionsTable:
     Type: String
-    Default: ''
 
 Transform: 'AWS::Serverless-2016-10-31'
 
