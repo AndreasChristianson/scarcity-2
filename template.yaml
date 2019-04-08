@@ -58,8 +58,8 @@ Resources:
           - EnvMap
           - !Ref EnvParameter
           - RegionId
-      HostedZoneName: !Sub "${TldParameter}."
-      Name: !Sub "wss.${EnvParameter}.${ProjectParameter}.${TldParameter}"
+      HostedZoneName: !Sub ${TldParameter}.
+      Name: !Sub wss.${EnvParameter}.${ProjectParameter}.${TldParameter}
       Type: A
   WssDeployment:
     Type: AWS::ApiGatewayV2::Deployment
@@ -218,7 +218,7 @@ Resources:
         FunctionName: disconnect
 Outputs:
   WebSocketURI:
-    Value: !Join [ '', [ 'wss://', !Ref WssApi, '.execute-api.', !Ref 'AWS::Region', '.amazonaws.com/', !Ref EnvParameter] ]
+    Value: !Sub wss://wss.${EnvParameter}.${ProjectParameter}.${TldParameter}
   StaticSite:
     Value: !Sub "${EnvParameter}.${ProjectParameter}.${TldParameter}."
   WssApiId:

@@ -1,6 +1,6 @@
 import React from "react";
 
-const App = async (props) =>
+const App = (props) =>
     <div className="App">
         <h1> 
             {'Hello, World!'} 
