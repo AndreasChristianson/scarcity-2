@@ -50,8 +50,23 @@ Resources:
       HostedZoneName: !Sub "${TldParameter}."
       Name: !Sub "wss.${EnvParameter}.${ProjectParameter}.${TldParameter}."
       Type: A
-# Wss Functions
-
+  WssDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn: DummyRoute
+    Properties:
+      Description: for domain mapping
+      ApiId: !Ref WssApi
+  WssStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: !Ref EnvParameter
+      ApiId: !Ref WssApi
+      DeploymentId: !Ref WssDeployment
+  DummyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WssApi
+      RouteKey: $default
 Outputs:
   WssApiId:
     Value: !Ref WssApi
