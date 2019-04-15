@@ -4,19 +4,14 @@ import {getWssUrl} from '../../../src/services/wss/get-wss-url'
 
 describe('get wss url', () => {
   const chance = new Chance();
-  let wssUrl;
 
   beforeEach(() => {
-    wssUrl = chance.url();
-    window.fetch = jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue(wssUrl)
-    });
-    jest.resetModules();
+    window.location.host = chance.domain()
   });
 
-  it('should call fetch', async () => {
-    await getWssUrl();
+  it('should prepend wss', async () => {
+    const url = getWssUrl();
 
-    expect(window.fetch).toHaveBeenCalledWith('/wss-url')
+    expect(url).toEqual(`wss://wss.${window.location.host}`)
   });
 });
