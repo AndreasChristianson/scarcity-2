@@ -1,12 +1,15 @@
 import Chance from 'chance';
 
-import {getWssUrl} from '../../../src/services/wss/get-wss-url'
+import getWssUrl from '../../../src/services/wss/get-wss-url'
 
 describe('get wss url', () => {
   const chance = new Chance();
 
   beforeEach(() => {
-    window.location.host = chance.domain()
+    delete window.location;
+    window.location = {
+      host: chance.domain()
+    };
   });
 
   it('should prepend wss', async () => {
