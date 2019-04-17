@@ -34,7 +34,7 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: nodejs8.10
-      AutoPublishAlias: !Ref GitShaParameter
+      AutoPublishAlias: live
       FunctionName: !Ref FunctionName
       CodeUri:
         Bucket: !Ref BucketNameParameter

@@ -1,1 +1,1 @@
-export const getWssUrl = () => `wss://wss.${window.location.host}`;
+export default () => `wss://wss.${window.location.host}`;
