@@ -12,9 +12,19 @@ describe('get wss url', () => {
     };
   });
 
-  it('should prepend wss', async () => {
+  it('should set dev wss', async () => {
     const url = getWssUrl();
 
-    expect(url).toEqual(`wss://wss.${window.location.host}`)
+    expect(url).toEqual('wss://wss.dev.scarcity.pessimistic-it.com')
+  });
+
+  it('should set prod wss', async () => {
+    window.location = {
+      host: `scarcity.${chance.domain()}`
+    };
+
+    const url = getWssUrl();
+
+    expect(url).toEqual('wss://wss.scarcity.pessimistic-it.com')
   });
 });

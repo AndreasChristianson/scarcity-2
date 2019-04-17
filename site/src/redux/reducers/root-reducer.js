@@ -1,8 +1,10 @@
-import messages from './message-reducer'
-import { combineReducers } from 'redux'
+import log from './log-reducer';
+import scarcity from './scarcity-reducer';
+import { combineReducers } from 'redux';
 
 const rootReducer = combineReducers({
-  messages
+  log,
+  scarcity
 });
 
-export default rootReducer
+export default rootReducer;
