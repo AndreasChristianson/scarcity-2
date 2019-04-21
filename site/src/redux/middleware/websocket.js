@@ -37,7 +37,8 @@ const websocketMiddleware = store => {
         'add',
         'remove',
         'update',
-        'replace'
+        'replace',
+        'clear'
       ]);
 
       store.dispatch({

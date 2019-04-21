@@ -1,6 +1,6 @@
 import React from "react";
 
-const App = (props) =>
+const App = () =>
     <div className="App">
         <h1> 
             {'Hello, World!'} 
