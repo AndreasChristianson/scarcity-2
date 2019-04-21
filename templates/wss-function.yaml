@@ -32,13 +32,13 @@ Resources:
   Function:
     Type: 'AWS::Serverless::Function'
     Properties:
-      Handler: index.handler
+      Handler: !Sub index.${FunctionName}
       Runtime: nodejs8.10
       AutoPublishAlias: live
       FunctionName: !Ref FunctionName
       CodeUri:
         Bucket: !Ref BucketNameParameter
-        Key: !Sub '${GitShaParameter}/wss/${FunctionName}/app.zip'
+        Key: !Sub '${GitShaParameter}/lambdas/app.zip'
       Layers:
         - !Ref SharedLayer
       Policies:

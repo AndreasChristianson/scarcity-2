@@ -35,6 +35,7 @@ const createScarcityReducer = (table) => (state = new Map(), { type, criteria, .
 
 const reducers = [
   'floor',
+  'floorObjects',
   'character',
   'chat',
   'actions'

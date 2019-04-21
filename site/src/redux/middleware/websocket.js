@@ -23,31 +23,15 @@ const websocketMiddleware = store => {
 
   websocket.onmessage = async ({ data }) => {
     try {
-      const { criteria, ...fields } = JSON.parse(data)
-      const { table, id, action } = criteria;
-
-      assert(table, [
-        'floor',
-        'character',
-        'chat',
-        'actions'
-      ]);      
-      assert(id);
-      assert(action, [
-        'add',
-        'remove',
-        'update',
-        'replace',
-        'clear'
-      ]);
+      const { criteria: {table, ...criteria}, ...fields } = JSON.parse(data)
 
       store.dispatch({
         ...fields,
-        type: `${SCARCITY_UPDATE}-${criteria.table}`,
+        type: `${SCARCITY_UPDATE}-${table}`,
         criteria
       });
     } catch (error) {
-      log('Invalid websocket message', { error, data });
+      log('Failed websocket message', { error, data });
     }
   };
 

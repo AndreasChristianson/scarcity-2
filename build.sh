@@ -14,9 +14,6 @@ fi
 
 
 packageFunction() {
-    if [ ! -d "${1}" ]; then
-        return
-    fi
     npm --prefix $1 install
     npm --prefix $1 run build
     cd ${1}dist;
@@ -32,19 +29,7 @@ packageFunction() {
     aws s3 cp ${1}dist/app.zip s3://scarcity-artifacts/${git_sha}/${1}app.zip
 }
 
-cd packages
-
-for D in wss/*/; 
-do 
-    packageFunction $D
-done
-
-for D in rest/*/; 
-do 
-    packageFunction $D
-done
-
-cd ..
+packageFunction lambdas/
 
 npm --prefix site install
 npm --prefix site run build
