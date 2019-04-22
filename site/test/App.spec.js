@@ -2,7 +2,10 @@ import ShallowRenderer from 'react-test-renderer/shallow';
 import React from 'react';
 import Chance from 'chance';
 
-import App from '../src/App';
+import App from '../src/components/App';
+import Footer from '../src/components/Footer';
+import Content from '../src/components/Content';
+import Header from '../src/components/Header';
 
 jest.mock('../src/services/wss/get-wss-url');
 
@@ -21,7 +24,9 @@ describe('App', ()=>{
         await render();
     });
 
-    it('should be a div', ()=>{
-        expect(result.type).toBe('div');
+    it('should contain the layout', ()=>{
+        expect(result.props.children[0].type).toBe(Header);
+        expect(result.props.children[1].type).toBe(Content);
+        expect(result.props.children[2].type).toBe(Footer);
     });
 });
