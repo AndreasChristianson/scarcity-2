@@ -216,6 +216,49 @@ Resources:
         BucketNameParameter: !Ref BucketNameParameter
         SharedLayer: !Ref SharedLayer
         FunctionName: disconnect
+  CognitoPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AliasAttributes: 
+        - email
+        - name
+      AutoVerifiedAttributes: 
+        - email
+      EmailConfiguration: 
+        ReplyToEmailAddress: !Sub ${ProjectParameter}-${EnvParameter}@${TldParameter}
+      MfaConfiguration: Off
+      Policies: 
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+          RequireUppercase: true
+      Schema:
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+      UsernameAttributes: 
+        - email
+      UserPoolName: !Sub ${EnvParameter}-${ProjectParameter}
+  CognitoClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+        ClientName: !Sub ${EnvParameter}-${ProjectParameter}-client
+        GenerateSecret: true
+        ReadAttributes: 
+          - email
+          - name
+        UserPoolId: !Ref CognitoPool
+        WriteAttributes: 
+          - email
+          - name
+
 Outputs:
   WebSocketURI:
     Value: !Sub wss://wss.${EnvParameter}.${ProjectParameter}.${TldParameter}
