@@ -20,7 +20,6 @@ describe('App', ()=>{
     };
     
     beforeEach(async ()=>{
-        global.__COMMIT_HASH__ = chance.guid();
         await render();
     });
 
