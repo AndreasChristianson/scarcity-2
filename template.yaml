@@ -221,12 +221,12 @@ Resources:
     Properties:
       AliasAttributes: 
         - email
-        - name
+        - preferred_username
       AutoVerifiedAttributes: 
         - email
       EmailConfiguration: 
         ReplyToEmailAddress: !Sub ${ProjectParameter}-${EnvParameter}@${TldParameter}
-      MfaConfiguration: Off
+      MfaConfiguration: OFF
       Policies: 
         PasswordPolicy:
           MinimumLength: 8
@@ -235,7 +235,7 @@ Resources:
           RequireSymbols: false
           RequireUppercase: true
       Schema:
-        - Name: name
+        - Name: preferred_username
           AttributeDataType: String
           Mutable: true
           Required: true
@@ -253,11 +253,11 @@ Resources:
         GenerateSecret: true
         ReadAttributes: 
           - email
-          - name
+          - preferred_username
         UserPoolId: !Ref CognitoPool
         WriteAttributes: 
           - email
-          - name
+          - preferred_username
 
 Outputs:
   WebSocketURI:
