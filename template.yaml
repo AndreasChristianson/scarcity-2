@@ -243,8 +243,6 @@ Resources:
           AttributeDataType: String
           Mutable: false
           Required: true
-      UsernameAttributes: 
-        - email
       UserPoolName: !Sub ${EnvParameter}-${ProjectParameter}
   CognitoClient:
     Type: AWS::Cognito::UserPoolClient
