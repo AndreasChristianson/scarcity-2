@@ -226,7 +226,7 @@ Resources:
         - email
       EmailConfiguration: 
         ReplyToEmailAddress: !Sub ${ProjectParameter}-${EnvParameter}@${TldParameter}
-      MfaConfiguration: OFF
+      MfaConfiguration: "OFF"
       Policies: 
         PasswordPolicy:
           MinimumLength: 8
