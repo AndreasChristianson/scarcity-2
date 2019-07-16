@@ -67,6 +67,7 @@ Resources:
     - Echo
     - Disconnect
     - Connect
+    - Default
     - DnsRecord
     Properties:
       Description: for domain mapping
@@ -194,6 +195,17 @@ Resources:
         BucketNameParameter: !Ref BucketNameParameter
         SharedLayer: !Ref SharedLayer
         FunctionName: echo
+  Default:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${BucketNameParameter}/${GitShaParameter}/templates/wss-function.yaml
+      Parameters:
+        ApiId: !Ref WssApi
+        RouteKey: $default
+        GitShaParameter: !Ref GitShaParameter
+        BucketNameParameter: !Ref BucketNameParameter
+        SharedLayer: !Ref SharedLayer
+        FunctionName: logger
   Connect:
     Type: AWS::CloudFormation::Stack
     Properties:
