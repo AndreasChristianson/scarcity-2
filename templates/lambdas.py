@@ -50,7 +50,7 @@ def createLambda(functionInfo):
         ApiId=Ref(api.WssApi),
         IntegrationType="AWS_PROXY",
         IntegrationUri=Join("", [
-            "arn", 
+            "arn:", 
             Ref("AWS::Partition"), 
             ":apigateway:",
             Ref("AWS::Region"),
