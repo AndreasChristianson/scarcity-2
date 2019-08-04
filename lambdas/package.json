@@ -11,8 +11,9 @@
     "@babel/cli": "^7.5.0",
     "@babel/core": "^7.5.4",
     "@babel/preset-env": "^7.5.4",
-    "aws-sdk": "^2.493.0",
     "jest": "^24.8.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "aws-sdk": "^2.502.0"
+  }
 }
