@@ -1,6 +1,6 @@
 git_sha=$(shell git rev-parse --short HEAD)
-layer_dir=lambda-layer/nodejs
-layer_version=$(shell npm --prefix $(layer_dir) --silent run get-version)
+layer_dir=lambda-layer
+layer_version=$(shell npm --prefix $(layer_dir)/nodejs --silent run get-version)
 lambda_dir=lambdas
 site_dir=site
 
@@ -14,22 +14,22 @@ endif
 clean:
 	git clean -dfx
 
-$(layer_dir)/node_modules/layer.zip: $(layer_dir)/package*
-	rm -rf $(layer_dir)/node_modules
-	npm --prefix $(layer_dir) install --production
-	zip -rqX $(layer_dir)/node_modules/layer.zip $(layer_dir)/node_modules
+$(layer_dir)/nodejs/node_modules/layer.zip: $(layer_dir)/nodejs/package*
+	rm -rf $(layer_dir)/nodejs/node_modules
+	npm --prefix $(layer_dir)/nodejs install --production
+	cd $(layer_dir); zip -rqX nodejs/node_modules/layer.zip nodejs/node_modules
 
-$(layer_dir)/node_modules/${git_sha}.uploaded: $(layer_dir)/node_modules/layer.zip
-	aws s3 cp $(layer_dir)/node_modules/layer.zip s3://scarcity-artifacts/layer/$(layer_version).zip
-	touch $(layer_dir)/node_modules/${git_sha}.uploaded
+$(layer_dir)/nodejs/node_modules/${git_sha}.uploaded: $(layer_dir)/nodejs/node_modules/layer.zip
+	aws s3 cp $(layer_dir)/nodejs/node_modules/layer.zip s3://scarcity-artifacts/layer/$(layer_version).zip
+	touch $(layer_dir)/nodejs/node_modules/${git_sha}.uploaded
 
 $(lambda_dir)/dist/app.zip: $(lambda_dir)/src/* $(lambda_dir)/package* $(lambda_dir)/.babelrc
 	npm --prefix $(lambda_dir) install
 	npm --prefix $(lambda_dir) run build
 	cd $(lambda_dir)/dist; zip -rX app.zip .
-	rm -rf $(lambda_dir)/node_modules
-	npm --prefix $(lambda_dir) install --production
-	cd $(lambda_dir); zip -rqX dist/app.zip node_modules
+	# rm -rf $(lambda_dir)/node_modules
+	# npm --prefix $(lambda_dir) install --production
+	# cd $(lambda_dir); zip -rqX dist/app.zip node_modules
 
 $(lambda_dir)/dist/${git_sha}.uploaded: $(lambda_dir)/dist/app.zip
 	aws s3 cp $(lambda_dir)/dist/app.zip s3://scarcity-artifacts/$(git_sha)/lambdas/app.zip
@@ -43,14 +43,10 @@ $(site_dir)/dist/${git_sha}.uploaded: $(site_dir)/dist
 	aws s3 cp $(site_dir)/dist s3://scarcity-artifacts/$(git_sha)/site/ --recursive
 	touch $(site_dir)/dist/${git_sha}.uploaded
 
-template.json: templates/* check-env
-	pip install --user troposphere[policy]
+template.json: templates/*.py check-env
 	python templates/template.py --env $(env) --sha $(git_sha) --layer $(layer_version) > template.json
 
-# template_upload:
-# 	aws s3 cp templates s3://scarcity-artifacts/$(git_sha)/templates/ --recursive
-
-upload: $(site_dir)/dist/${git_sha}.uploaded $(lambda_dir)/dist/${git_sha}.uploaded $(layer_dir)/node_modules/${git_sha}.uploaded 
+upload: $(site_dir)/dist/${git_sha}.uploaded $(lambda_dir)/dist/${git_sha}.uploaded $(layer_dir)/nodejs/node_modules/${git_sha}.uploaded 
 
 deploy: upload template.json check-env
 	aws cloudformation validate-template --template-body file://template.json

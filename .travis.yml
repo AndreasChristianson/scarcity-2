@@ -10,24 +10,26 @@ env:
   - secure: vtEXal0r7zcGcM7FkOooPJpkAEYoXdk7n1uBRWVyccWgCXCnUKCdNalIP/6skyiKv2er9YWi8N3svi2vlGo3/wGJUT18n9PzPqsHLDhKSBYJhohzv7LwVXgK7Ol9rmjeDNp76kyQpFWallF/QgWBq+Pi/G6t+L4rDCDxqxUVs/0nxSQ6UVvkaBLli2nnFWOCyrtp58B4vWS2Srhqr6Hb6ZJgot6xaeaVQJMNkd4rc2WgbvHidQXAOz4dQs6azjY4IQ5POmADWQ56XT037ggxTQiYNWkyGG4s2GZoe/ATNQOcpn/y5PcWXiLraPpu8dJFXGUpvTlrDIqRjw56KdrQF5Y3//yCuRTTO6j398A6OOgSxaKfHX3+i2C2Euqu54ouX8TxNUzAy5G2T27WzRUIHLrCxIZLUK8347UGvLcpkKvVDPCyndx2v/A1Eo5bGFTPai+llQ3rC49vCVY+DAthQM6hpbo5uko8JgHu4s9x3HVb7QIcCHJe2AmoXQO+bhmRdlFA/dgIQE9hwzUDr9L5/JC5HA62Lkk2WF/J2ci3ROwaOV0z0VStuAWvoUL/H/bQqg3VCsYXJ3BuiUpkCy7kg2T1cmQegnTaTdkjR+9KDrF+S9Q1mUIwnaw5X9OiHcOXh7ioGzj4HgRPXgzbyjU0ZPPyORcrSZLeHn6PHx/CvVI=
 jobs:
   include:
-  - stage: build
+  # - stage: build
+  #   cache:
+  #   - pip
+  #   - npm
+  #   before_script:
+  #   - pip install --user awscli
+  #   script: 
+  #   - set -e
+  #   - ./unit.sh
+  #   - ./build.sh
+  - stage: deploy-dev
+    if: branch = master
     cache:
     - pip
     - npm
     before_script:
     - pip install --user awscli
-    script: 
-    - set -e
-    - ./unit.sh
-    - ./build.sh
-  - stage: deploy-dev
-    if: branch = master
-    cache:
-    - pip
-    before_script:
-    - pip install --user awscli
     - npm install -g wscat
+    - pip install --user troposphere[policy]
     script:
     - set -e
-    - ./deploy.sh dev
-    - ./smoke-test.sh dev
+    - env=dev make clean deploy
+    # - ./smoke-test.sh dev
