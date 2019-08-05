@@ -8,12 +8,11 @@
     "build": "babel src -d dist"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.0",
-    "@babel/core": "^7.5.4",
-    "@babel/preset-env": "^7.5.4",
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "aws-sdk": "^2.503.0",
     "jest": "^24.8.0"
   },
-  "dependencies": {
-    "aws-sdk": "^2.502.0"
-  }
+  "dependencies": {}
 }

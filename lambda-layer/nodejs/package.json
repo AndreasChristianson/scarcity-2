@@ -5,7 +5,7 @@
     "get-version": "echo $npm_package_version"
   },
   "dependencies": {
-    "aws-sdk": "^2.427.0",
+    "aws-sdk": "^2.503.0",
     "moment": "^2.24.0"
   }
 }

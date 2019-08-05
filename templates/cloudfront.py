@@ -20,7 +20,7 @@ SiteCloudfront = Distribution(
         Enabled=True,
         Aliases=[
             constants.siteDomainName,
-            "www." + constants.siteDomainName
+            # "www." + constants.siteDomainName
         ],
         DefaultCacheBehavior=DefaultCacheBehavior(
             AllowedMethods=[
@@ -55,21 +55,21 @@ SiteDns = RecordSetType(
     )
 )
 
-WwwSiteDns = RecordSetType(
-    "WwwSiteDns",
-    Type="A",
-    Name="www." + constants.siteDomainName,
-    HostedZoneName=constants.hostedZoneName,
-    AliasTarget=AliasTarget(
-        DNSName=GetAtt(SiteCloudfront, "DomainName"),
-        HostedZoneId="Z2FDTNDATAQYW2"
-    )
-)
+# WwwSiteDns = RecordSetType(
+#     "WwwSiteDns",
+#     Type="A",
+#     Name="www." + constants.siteDomainName,
+#     HostedZoneName=constants.hostedZoneName,
+#     AliasTarget=AliasTarget(
+#         DNSName=GetAtt(SiteCloudfront, "DomainName"),
+#         HostedZoneId="Z2FDTNDATAQYW2"
+#     )
+# )
 
 def addResources(t): 
     t.add_resource(SiteCloudfront)
     t.add_resource(SiteDns)
-    t.add_resource(WwwSiteDns)
+    # t.add_resource(WwwSiteDns)
     t.add_output([
         Output(
             "StaticSite",

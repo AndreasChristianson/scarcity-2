@@ -1,8 +1,10 @@
-from troposphere import Output, Parameter, Ref, Template, Join
+from troposphere import Output, Parameter, Ref, Template, Join, GetAtt
 from troposphere.serverless import Function, S3Location
 from troposphere.apigatewayv2 import Integration, Route, Deployment, Stage
 from troposphere.awslambda import LayerVersion, Permission, Content
 from troposphere.apigateway import BasePathMapping
+from awacs.aws import Allow, Statement, Principal, PolicyDocument
+from awacs.execute_api import ManageConnections
 
 import constants
 import api
@@ -23,7 +25,7 @@ def createLambda(functionInfo):
         "Function" + functionInfo["name"],
         FunctionName=functionInfo["name"],
         Handler="index." + functionInfo["handler"],
-        Runtime="nodejs8.10",
+        Runtime="nodejs10.x",
         AutoPublishAlias="live",
         CodeUri=S3Location(
             Bucket=constants.bucketName,
@@ -33,9 +35,29 @@ def createLambda(functionInfo):
             Ref(layer)
         ],
         Policies=[
-            "AmazonDynamoDBReadOnlyAccess"
+            "AmazonDynamoDBFullAccess",
+            PolicyDocument(
+                Statement=[
+                    Statement(
+                        Effect=Allow,
+                        Action=[ManageConnections],
+                        Resource=[
+                            Join("", [
+                                "arn:", 
+                                Ref("AWS::Partition"), 
+                                ":execute-api:",
+                                Ref("AWS::Region"),
+                                ":",
+                                Ref("AWS::AccountId"),
+                                ":",
+                                Ref(api.WssApi),
+                                "/*"
+                            ])
+                        ]
+                    )
+                ]
+            )
         ]
-        # todo allow manage connections
     )
 
     permission = Permission(
@@ -55,7 +77,7 @@ def createLambda(functionInfo):
             ":apigateway:",
             Ref("AWS::Region"),
             ":lambda:path/2015-03-31/functions/",
-            Ref(l),
+            GetAtt(l, "Arn"),
             "/invocations"
         ])
     )

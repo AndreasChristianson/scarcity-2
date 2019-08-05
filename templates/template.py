@@ -16,10 +16,8 @@ t.set_transform('AWS::Serverless-2016-10-31')
 
 
 api.addResources(t)
-
 cloudfront.addResources(t)
 tables.addTables(t)
-
 lambdas.addResources(t)
 
 t.add_output([
