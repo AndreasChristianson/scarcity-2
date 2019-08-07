@@ -6,6 +6,8 @@
   },
   "dependencies": {
     "aws-sdk": "^2.503.0",
-    "moment": "^2.24.0"
+    "moment": "^2.24.0",
+    "winston": "^3.2.1",
+    "winston-cloudwatch": "^2.0.6"
   }
 }

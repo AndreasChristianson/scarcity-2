@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
 import moment from 'moment';
+import { accessDDb } from './util/ddb-crud';
 
 const ddb = new AWS.DynamoDB.DocumentClient();
 
@@ -14,8 +15,8 @@ export const handler = async (event, context) => {
             ttl: sixHoursFromNow()
         }
     };
-
-    await ddb.put(putParams).promise();
+    
+    await accessDDb(put, putParams)
 
     return {
         statusCode: 200,
