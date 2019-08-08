@@ -1,9 +1,9 @@
-import winston from 'winston';
-import WinstonCloudWatch from 'winston-cloudwatch';
+import Logger from 'lamlog';
 
-export default (logStreamName = process.env.AWS_LAMBDA_LOG_STREAM_NAME, logGroupName = process.env.AWS_LAMBDA_LOG_GROUP_NAME) =>
-    winston.add(new WinstonCloudWatch({
-        logGroupName,
-        logStreamName,
-        level: 'silly'
-    }));
+const defaultLogger = new Logger({ name: process.env.AWS_LAMBDA_FUNCTION_NAME, level: 'trace' });
+
+const getDefaultLogger = () => defaultLogger;
+
+const getSubprocessLogger = (name) => defaultLogger.child({ name });
+
+export const getLogger = name => name ? getSubprocessLogger(name) : getDefaultLogger;

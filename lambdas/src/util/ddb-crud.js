@@ -1,8 +1,8 @@
 import AWS from 'aws-sdk';
-import makeLogger from './logger';
+import {getLogger} from './logger';
 
 const ddb = new AWS.DynamoDB.DocumentClient();
-const logger = makeLogger();
+const logger = getLogger('ddb');
 
 export const updateField = async (table, pk, field, value) => {
     const updateParams = {
@@ -20,9 +20,9 @@ export const updateField = async (table, pk, field, value) => {
 
 export const accessDDb = async (method, parameters) => {
     try {
-        logger.silly('accessing dynamo db', { method, parameters });
+        logger.trace('accessing dynamo db', { method, parameters });
         const returnValue = await ddb[method](parameters).promise();
-        logger.silly('fetched', { returnValue });
+        logger.trace('fetched', { returnValue });
         return returnValue;
     } catch (error) {
         logger.error('error when accessing dynamo db', { error, method, parameters });
