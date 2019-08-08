@@ -1,7 +1,8 @@
 import AWS from 'aws-sdk';
-import logger from './logger';
+import makeLogger from './logger';
 
 const ddb = new AWS.DynamoDB.DocumentClient();
+const logger = makeLogger();
 
 export const updateField = async (table, pk, field, value) => {
     const updateParams = {

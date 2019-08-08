@@ -15,8 +15,8 @@ export const handler = async (event, context) => {
             ttl: sixHoursFromNow()
         }
     };
-    
-    await accessDDb(put, putParams)
+
+    await accessDDb('put', putParams)
 
     return {
         statusCode: 200,
