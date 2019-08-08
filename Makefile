@@ -23,7 +23,7 @@ $(layer_dir)/nodejs/node_modules/${git_sha}.uploaded: $(layer_dir)/nodejs/node_m
 	aws s3 cp $(layer_dir)/nodejs/node_modules/layer.zip s3://scarcity-artifacts/layer/$(layer_version).zip
 	touch $(layer_dir)/nodejs/node_modules/${git_sha}.uploaded
 
-$(lambda_dir)/dist/app.zip: $(lambda_dir)/src/* $(lambda_dir)/package* $(lambda_dir)/.babelrc
+$(lambda_dir)/dist/app.zip: $(shell find $(lambda_dir)/src -type f) $(lambda_dir)/src $(lambda_dir)/package* $(lambda_dir)/.babelrc
 	npm --prefix $(lambda_dir) install
 	npm --prefix $(lambda_dir) run build
 	cd $(lambda_dir)/dist; zip -rX app.zip .
@@ -35,7 +35,7 @@ $(lambda_dir)/dist/${git_sha}.uploaded: $(lambda_dir)/dist/app.zip
 	aws s3 cp $(lambda_dir)/dist/app.zip s3://scarcity-artifacts/$(git_sha)/lambdas/app.zip
 	touch $(lambda_dir)/dist/${git_sha}.uploaded
 
-$(site_dir)/dist: $(site_dir)/package* $(site_dir)/src/* $(site_dir)/static/*
+$(site_dir)/dist: $(shell find $(site_dir)/static -type f) $(shell find $(site_dir)/src -type f) $(site_dir)/package* $(site_dir)/src $(site_dir)/static
 	npm --prefix $(site_dir) install
 	npm --prefix $(site_dir) run build
 
