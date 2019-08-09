@@ -28,7 +28,29 @@ def createLambda(functionInfo):
             Ref(layer.layer)
         ],
         Policies=[
-            "AWSLambdaDynamoDBExecutionRole"
+            "AWSLambdaDynamoDBExecutionRole",
+            "AmazonDynamoDBFullAccess",
+            PolicyDocument(
+                Statement=[
+                    Statement(
+                        Effect=Allow,
+                        Action=[ManageConnections],
+                        Resource=[
+                            Join("", [
+                                "arn:", 
+                                Ref("AWS::Partition"), 
+                                ":execute-api:",
+                                Ref("AWS::Region"),
+                                ":",
+                                Ref("AWS::AccountId"),
+                                ":",
+                                Ref(api.WssApi),
+                                "/*"
+                            ])
+                        ]
+                    )
+                ]
+            )
         ],
         Events={
             "ConnectionChange": DynamoDBEvent(
