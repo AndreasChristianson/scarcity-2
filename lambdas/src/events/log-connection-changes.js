@@ -1,2 +1,2 @@
-export const  handler = ({Records:{dynamodb, ...event}}, context, callback) =>
-    console.log(dynamodb)
+export const  handler = ({Records}, context, callback) =>
+    Records.forEach(({dynamodb:{OldImage, NewImage, SequenceNumber, Keys}, ...event}) => console.log({OldImage, NewImage, event}))
