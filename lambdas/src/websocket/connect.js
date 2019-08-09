@@ -1,8 +1,6 @@
-import AWS from 'aws-sdk';
 import moment from 'moment';
-import { accessDDb } from './util/ddb-crud';
+import { accessDDb } from '../util/ddb-crud';
 
-const ddb = new AWS.DynamoDB.DocumentClient();
 
 const sixHoursFromNow = () => moment().add(6, 'hours').unix();
 

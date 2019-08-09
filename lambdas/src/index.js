@@ -1,4 +1,5 @@
-export {handler as connect} from './connect';
-export {handler as echo} from './echo';
-export {handler as disconnect} from './disconnect';
-export {handler as logger} from './logger';
+export {handler as connect} from './websocket/connect';
+export {handler as echo} from './websocket/echo';
+export {handler as disconnect} from './websocket/disconnect';
+export {handler as logger} from './websocket/logger';
+export {handler as connectionChange} from './events/log-connection-changes';

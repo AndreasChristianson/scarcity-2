@@ -9,16 +9,9 @@ from awacs.execute_api import ManageConnections
 import constants
 import api
 import tables
+import layer
 
 import sys
-
-layer = LayerVersion(
-    "SharedLayer",
-    Content=Content(
-        S3Bucket=constants.bucketName,
-        S3Key="layer/{0}.zip".format(constants.layer)
-    )
-)
 
 def createLambda(functionInfo):
     l = Function(
@@ -32,7 +25,7 @@ def createLambda(functionInfo):
             Key=constants.sha + "/lambdas/app.zip"
         ),
         Layers=[
-            Ref(layer)
+            Ref(layer.layer)
         ],
         Policies=[
             "AmazonDynamoDBFullAccess",
@@ -144,7 +137,6 @@ def addResources(t):
     t.add_resource(WssDeployment)
     t.add_resource(WssStage)
     t.add_resource(DomainMapping)
-    t.add_resource(layer)
 
     for lambdaInfo in lambdas:
         t.add_resource(lambdaInfo["lambda"])

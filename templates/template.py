@@ -5,8 +5,10 @@ import constants
 
 import cloudfront
 import tables
-import lambdas
+import web_sockets
 import api
+import ddb_events
+import layer
 
 
 t = Template()
@@ -18,7 +20,9 @@ t.set_transform('AWS::Serverless-2016-10-31')
 api.addResources(t)
 cloudfront.addResources(t)
 tables.addTables(t)
-lambdas.addResources(t)
+web_sockets.addResources(t)
+ddb_events.addResources(t)
+layer.addResources(t)
 
 t.add_output([
     Output(

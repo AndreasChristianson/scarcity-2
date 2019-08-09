@@ -1,6 +1,5 @@
-import AWS from 'aws-sdk';
+import { accessDDb } from '../util/ddb-crud';
 
-const ddb = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event, context) => {
     const { requestContext: { connectionId } } = event;
@@ -11,7 +10,8 @@ export const handler = async (event, context) => {
         }
     };
 
-    await ddb.delete(params).promise();
+    await accessDDb('delete', params)
+
 
     return {
         statusCode: 200,
