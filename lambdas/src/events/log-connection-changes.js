@@ -1,2 +1,2 @@
-export const  handler = ({Records}, context, callback) =>
-    console.log(Records)
+export const  handler = ({Records:{dynamodb, ...event}}, context, callback) =>
+    console.log(dynamodb)

@@ -49,7 +49,7 @@ ConnectionsTable = Table(
         )
     ],
     StreamSpecification=StreamSpecification(
-        StreamViewType="KEYS_ONLY"
+        StreamViewType="NEW_AND_OLD_IMAGES"
     ),
     GlobalSecondaryIndexes=[
         GlobalSecondaryIndex(
