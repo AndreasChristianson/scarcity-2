@@ -68,9 +68,9 @@ def createLambda(functionInfo):
 
 lambdaDefinitions = [
     {
-        "name": "ConnectionChangeHandler",
+        "name": "ConnectionsChangeHandler",
         "table": "ConnectionsTable",
-        "handler": "connectionChangeHandler",
+        "handler": "connectionsChangeHandler",
     },
     {
         "name": "ObjectsChangeHandler",
