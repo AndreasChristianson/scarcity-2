@@ -10,7 +10,7 @@ export const handler = async (event, context) => {
         }
     };
 
-    await accessDDb('delete', params)
+    await accessDDb('delete', params);
 
 
     return {

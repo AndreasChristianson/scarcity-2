@@ -14,7 +14,7 @@ export const handler = async (event, context) => {
         }
     };
 
-    await accessDDb('put', putParams)
+    await accessDDb('put', putParams);
 
     return {
         statusCode: 200,

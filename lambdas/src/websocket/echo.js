@@ -1,4 +1,5 @@
 import AWS from 'aws-sdk';
+import {accessDDb} from '../util/ddb-crud';
 
 const ddb = new AWS.DynamoDB.DocumentClient();
 
@@ -16,7 +17,7 @@ export const handler = async (event, context) => {
         ProjectionExpression: 'connectionId'
     };
 
-    const connectionData = await ddb.scan(scanParams).promise();
+    const connectionData = await accessDDb('scan',scanParams);
 
     await Promise.all(connectionData.Items.map(async ({ connectionId }) => {
         try {
