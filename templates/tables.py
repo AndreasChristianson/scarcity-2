@@ -64,22 +64,14 @@ ConnectionsTable = Table(
         ),
     ]
 )
-ObjectsTable = Table(
-    "ObjectsTable",
+FloorObjectsTable = Table(
+    "FloorObjectsTable",
     BillingMode="PAY_PER_REQUEST",
-    TableName="Objects",
+    TableName="FloorObjects",
     AttributeDefinitions=[
         AttributeDefinition(
             AttributeName=objectIdAttribute,
             AttributeType="S"
-        ),
-        AttributeDefinition(
-            AttributeName=positionXAttribute,
-            AttributeType="N"
-        ),
-        AttributeDefinition(
-            AttributeName=positionYAttribute,
-            AttributeType="N"
         ),
         AttributeDefinition(
             AttributeName=floorAttribute,
@@ -100,14 +92,6 @@ ObjectsTable = Table(
             IndexName="positionIndex",
             KeySchema=[
                 KeySchema(
-                    AttributeName=positionXAttribute,
-                    KeyType="RANGE"
-                ),
-                KeySchema(
-                    AttributeName=positionYAttribute,
-                    KeyType="RANGE"
-                ),
-                KeySchema(
                     AttributeName=floorAttribute,
                     KeyType="HASH"
                 ),
@@ -119,16 +103,40 @@ ObjectsTable = Table(
     ]
 )
 
+FloorsTable = Table(
+    "FloorsTable",
+    BillingMode="PAY_PER_REQUEST",
+    TableName="Floors",
+    AttributeDefinitions=[
+        AttributeDefinition(
+            AttributeName=floorAttribute,
+            AttributeType="S"
+        ),
+    ],
+    KeySchema=[
+        KeySchema(
+            AttributeName=floorAttribute,
+            KeyType="HASH"
+        )
+    ],
+    StreamSpecification=StreamSpecification(
+        StreamViewType="NEW_AND_OLD_IMAGES"
+    )
+)
+
 
 def addTables(t): 
     t.add_resource(ConnectionsTable)
-    t.add_resource(ObjectsTable)
+    t.add_resource(FloorsTable)
+    t.add_resource(FloorObjectsTable)
 
-    t.add_output(Output(
-        "ConnectionsTable",
-        Value=Ref(ConnectionsTable)
-    ))    
-    t.add_output(Output(
-        "ObjectsTable",
-        Value=Ref(ObjectsTable)
-    ))
+    t.add_output([
+        Output(
+            "ConnectionsTable",
+            Value=Ref(ConnectionsTable)
+        ),
+        Output(
+            "FloorObjectsTable",
+            Value=Ref(FloorObjectsTable)
+        )
+    ])
