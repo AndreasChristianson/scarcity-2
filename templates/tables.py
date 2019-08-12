@@ -78,7 +78,7 @@ ObjectsTable = Table(
             AttributeType="N"
         ),
         AttributeDefinition(
-            AttributeName=positionXAttribute,
+            AttributeName=positionYAttribute,
             AttributeType="N"
         ),
         AttributeDefinition(
