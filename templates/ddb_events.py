@@ -61,25 +61,22 @@ def createLambda(functionInfo):
         }
     )
     
-    # permission = Permission(
-    #     "Permission" + functionInfo["name"],
-    #     FunctionName=Ref(l),
-    #     Action="lambda:InvokeFunction",
-    #     Principal="apigateway.amazonaws.com"
-    # )
-
     return {
         "name": functionInfo["name"],
         "lambda": l,
-        # "permission": permission
     }
 
 lambdaDefinitions = [
     {
-        "name": "ConnectionChange",
+        "name": "ConnectionChangeHandler",
         "table": "ConnectionsTable",
-        "handler": "connectionChange",
-    }
+        "handler": "connectionChangeHandler",
+    },
+    {
+        "name": "ObjectsChangeHandler",
+        "table": "ObjectsTable",
+        "handler": "objectsChangeHandler",
+    },
 ]
 
 lambdas = list(map(createLambda, lambdaDefinitions))
@@ -88,7 +85,6 @@ def addResources(t):
 
     for lambdaInfo in lambdas:
         t.add_resource(lambdaInfo["lambda"])
-        # t.add_resource(lambdaInfo["permission"])
 
         t.add_output(Output(
             "Lambda" + lambdaInfo["name"],
