@@ -16,8 +16,10 @@ import constants
 ttlAttribute = "ttl"
 accountIdAttribute = "accountId"
 floorAttribute = "floor"
-positionAttribute = "position"
+positionXAttribute = "positionX"
+positionYAttribute = "positionY"
 connectionIdAttribute = "connectionId"
+objectIdAttribute = "objectId"
 
 
 ConnectionsTable = Table(
@@ -35,10 +37,6 @@ ConnectionsTable = Table(
         ),
         AttributeDefinition(
             AttributeName=accountIdAttribute,
-            AttributeType="S"
-        ),
-        AttributeDefinition(
-            AttributeName=floorAttribute,
             AttributeType="S"
         ),
     ],
@@ -64,29 +62,73 @@ ConnectionsTable = Table(
                 ProjectionType="KEYS_ONLY"
             ),
         ),
+    ]
+)
+ObjectsTable = Table(
+    "ObjectsTable",
+    BillingMode="PAY_PER_REQUEST",
+    TableName="Objects",
+    AttributeDefinitions=[
+        AttributeDefinition(
+            AttributeName=objectIdAttribute,
+            AttributeType="S"
+        ),
+        AttributeDefinition(
+            AttributeName=positionXAttribute,
+            AttributeType="N"
+        ),
+        AttributeDefinition(
+            AttributeName=positionXAttribute,
+            AttributeType="N"
+        ),
+        AttributeDefinition(
+            AttributeName=floorAttribute,
+            AttributeType="S"
+        ),
+    ],
+    KeySchema=[
+        KeySchema(
+            AttributeName=objectIdAttribute,
+            KeyType="HASH"
+        )
+    ],
+    StreamSpecification=StreamSpecification(
+        StreamViewType="NEW_AND_OLD_IMAGES"
+    ),
+    GlobalSecondaryIndexes=[
         GlobalSecondaryIndex(
-            IndexName="floorIndex",
+            IndexName="positionIndex",
             KeySchema=[
+                KeySchema(
+                    AttributeName=positionXAttribute,
+                    KeyType="RANGE"
+                ),
+                KeySchema(
+                    AttributeName=positionYAttribute,
+                    KeyType="RANGE"
+                ),
                 KeySchema(
                     AttributeName=floorAttribute,
                     KeyType="HASH"
                 ),
             ],
             Projection=Projection(
-                NonKeyAttributes=[
-                    positionAttribute
-                ],
-                ProjectionType="INCLUDE"
+                ProjectionType="ALL"
             ),
-        )
+        ),
     ]
 )
 
 
 def addTables(t): 
     t.add_resource(ConnectionsTable)
+    t.add_resource(ObjectsTable)
 
     t.add_output(Output(
         "ConnectionsTable",
         Value=Ref(ConnectionsTable)
+    ))    
+    t.add_output(Output(
+        "ObjectsTable",
+        Value=Ref(ObjectsTable)
     ))
