@@ -73,9 +73,9 @@ lambdaDefinitions = [
         "handler": "connectionsChangeHandler",
     },
     {
-        "name": "ObjectsChangeHandler",
-        "table": "ObjectsTable",
-        "handler": "objectsChangeHandler",
+        "name": "FloorObjectsChangeHandler",
+        "table": "FloorObjectsTable",
+        "handler": "floorObjectsChangeHandler",
     },
 ]
 
