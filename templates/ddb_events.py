@@ -1,7 +1,7 @@
 from troposphere import Output, Parameter, Ref, Template, Join, GetAtt
 from troposphere.serverless import Function, S3Location, DynamoDBEvent
 from troposphere.apigatewayv2 import Integration, Route, Deployment, Stage
-from troposphere.awslambda import LayerVersion, Permission, Content
+from troposphere.awslambda import LayerVersion, Permission, Content, Environment
 from troposphere.apigateway import BasePathMapping
 from awacs.aws import Allow, Statement, Principal, PolicyDocument
 from awacs.execute_api import ManageConnections
@@ -10,6 +10,7 @@ import constants
 import api
 import tables
 import layer
+import web_sockets
 
 import sys
 
@@ -52,6 +53,12 @@ def createLambda(functionInfo):
                 ]
             )
         ],
+        Environment=Environment(
+            Variables={
+                'API_ID': Ref(api.Api),
+                'STAGE': Ref(web_sockets.WssStage)
+            },
+        ),
         Events={
             "ConnectionChange": DynamoDBEvent(
                 "ConnectionChange",

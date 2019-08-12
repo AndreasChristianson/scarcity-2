@@ -1,7 +1,7 @@
 from troposphere import Output, Parameter, Ref, Template, Join, GetAtt
 from troposphere.serverless import Function, S3Location
 from troposphere.apigatewayv2 import Integration, Route, Deployment, Stage
-from troposphere.awslambda import LayerVersion, Permission, Content
+from troposphere.awslambda import LayerVersion, Permission, Content, Environment
 from troposphere.apigateway import BasePathMapping
 from awacs.aws import Allow, Statement, Principal, PolicyDocument
 from awacs.execute_api import ManageConnections
@@ -27,6 +27,12 @@ def createLambda(functionInfo):
         Layers=[
             Ref(layer.layer)
         ],
+        Environment=Environment(
+            Variables={
+                'API_ID': Ref(api.Api),
+                'STAGE': Ref(WssStage)
+            },
+        ),
         Policies=[
             "AmazonDynamoDBFullAccess",
             PolicyDocument(
