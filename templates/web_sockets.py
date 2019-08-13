@@ -42,7 +42,7 @@ def createLambda(functionInfo):
         Environment=Environment(
             Variables={
                 'API_ID': Ref(api.WssApi),
-                'STAGE': Ref(WssStage)
+                'STAGE': constants.env
             },
         ),
         Policies=[
