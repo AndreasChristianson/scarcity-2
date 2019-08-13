@@ -55,7 +55,7 @@ def createLambda(functionInfo):
         ],
         Environment=Environment(
             Variables={
-                'API_ID': Ref(api.Api),
+                'API_ID': Ref(api.WssApi),
                 'STAGE': Ref(web_sockets.WssStage)
             },
         ),
