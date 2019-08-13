@@ -13,6 +13,18 @@ import layer
 
 import sys
 
+WssDeployment = Deployment(
+    "WssDeployment",
+    ApiId=Ref(api.WssApi),
+)
+
+WssStage = Stage(
+    "WssStage",
+    StageName=constants.env,
+    ApiId=Ref(api.WssApi),
+    DeploymentId=Ref(WssDeployment),
+)
+
 def createLambda(functionInfo):
     l = Function(
         "Function" + functionInfo["name"],
@@ -119,18 +131,8 @@ lambdaDefinitions = [
 ]
 
 lambdas = list(map(createLambda, lambdaDefinitions))
-WssDeployment = Deployment(
-    "WssDeployment",
-    ApiId=Ref(api.WssApi),
-    DependsOn=list(map(lambda x: x["lambda"].title, lambdas))
-)
 
-WssStage = Stage(
-    "WssStage",
-    StageName=constants.env,
-    ApiId=Ref(api.WssApi),
-    DeploymentId=Ref(WssDeployment),
-)
+WssDeployment.DependsOn=list(map(lambda x: x["lambda"].title, lambdas))
 
 DomainMapping = BasePathMapping(
     "DomainMapping",

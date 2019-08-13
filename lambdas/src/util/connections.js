@@ -18,8 +18,7 @@ export const postToConnection = async (ConnectionId, Data) => {
         logger.trace('Sent websocket message', { ConnectionId, Data });
     } catch (error) {
         if (error.statusCode !== 410) {
-        logger.error('error when sending message.', { error, ConnectionId, Data });
-
+            logger.error('error when sending message.', { error, ConnectionId, Data });
             throw error;
         }
     }
