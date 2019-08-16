@@ -10,7 +10,7 @@ export const handler = async (event, context) => {
         ProjectionExpression: 'connectionId'
     };
 
-    const connectionData = await accessDDb('scan',scanParams);
+    const connectionData = await accessDDb('scan', scanParams);
 
     await Promise.all(
         connectionData.Items.map(

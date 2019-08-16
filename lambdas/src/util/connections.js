@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import {getLogger} from './logger';
 
-const logger = getLogger('ddb');
+const logger = getLogger('connections');
 
 const managementApi = new AWS.ApiGatewayManagementApi({
     apiVersion: '2018-11-29',

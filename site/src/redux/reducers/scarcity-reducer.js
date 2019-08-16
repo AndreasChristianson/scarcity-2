@@ -11,16 +11,10 @@ const applyStateUpdate = (map, { action, id }, data) => {
           key => [key, data[key]]
         )
       );
-    case 'add':
+    case 'upsert':
       return map.set(id, data);
     case 'remove':
       map.delete(id);
-      return map;
-    case 'update':
-      const newValue = merge(map.get(id), data);
-      return map.set(id, newValue);
-    case 'clear':
-      map.clear();
       return map;
   }
 };
