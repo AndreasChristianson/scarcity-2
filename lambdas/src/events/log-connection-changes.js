@@ -1,4 +1,6 @@
+import {processRecords} from '../util/ddb-stream';
+
 export const handler = async ({Records}, context, callback) =>
-    Records.forEach(({dynamodb:{OldImage, NewImage, SequenceNumber, Keys}, ...event}) => {
-        console.log({OldImage, NewImage, event});
-    });
+    processRecords(Records, (context) => 
+        console.log(context)
+    );

@@ -1,5 +1,6 @@
 import { getObjectsOnFloor } from '../util/floor-objects';
 import { postToConnection } from '../util/connections';
+import {processRecords} from '../util/ddb-stream';
 
 const getConnectionsOnFloor = async (floor) => {
     const objects = await getObjectsOnFloor(floor);
@@ -41,16 +42,15 @@ const upsertObjectOnFloor = async (floor, object) => {
 }
 
 export const handler = async ({ Records }, context, callback) =>
-    Records.forEach(({ dynamodb: { OldImage, NewImage, SequenceNumber, Keys }, ...event }) => {
-        if (NewImage && OldImage) {
-            upsertObjectOnFloor(NewImage.floor, NewImage)
-            if (NewImage.floor !== OldImage.floor) {
-                deleteObjectFromFloor(OldImage.floor, OldImage.objectId);
+    processRecords(Records, ({oldObject, newObject}) => {
+        if (newObject && oldObject) {
+            upsertObjectOnFloor(newObject.floor, newObject)
+            if (newObject.floor !== oldObject.floor) {
+                deleteObjectFromFloor(oldObject.floor, oldObject.objectId);
             }
-        } else if (NewImage) {
-            upsertObjectOnFloor(NewImage.floor, NewImage)
+        } else if (newObject) {
+            upsertObjectOnFloor(newObject.floor, newObject)
         } else {
-            deleteObjectFromFloor(OldImage.floor, OldImage.objectId);
+            deleteObjectFromFloor(oldObject.floor, oldObject.objectId);
         }
     });
-
