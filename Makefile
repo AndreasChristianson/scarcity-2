@@ -61,7 +61,7 @@ deploy: upload template.json check-env
 			--no-fail-on-empty-changeset
 	aws s3 sync s3://scarcity-artifacts/${git_sha}/site/ s3://scarcity-site-$(env)/ --delete
 	aws apigatewayv2 create-deployment \
-		--api-id $(shell aws cloudformation describe-stacks  --stack-name scarcity-$(env) --query "Stacks[0].Outputs[?OutputKey=='WssApiId'].OutputValue" --output text) \
+		--api-id $$(aws cloudformation describe-stacks  --stack-name scarcity-$(env) --query "Stacks[0].Outputs[?OutputKey=='WssApiId'].OutputValue" --output text) \
 		--stage-name $(env) \
 		--description ${git_sha}
 
