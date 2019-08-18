@@ -89,7 +89,7 @@ FloorObjectsTable = Table(
     ),
     GlobalSecondaryIndexes=[
         GlobalSecondaryIndex(
-            IndexName="positionIndex",
+            IndexName="floorIndex",
             KeySchema=[
                 KeySchema(
                     AttributeName=floorAttribute,
