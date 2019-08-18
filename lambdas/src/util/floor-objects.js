@@ -5,6 +5,7 @@ const logger = getLogger('floor-objects');
 
 export const getObjectsOnFloor = async (floor) => {
     var params = {
+        IndexName: "floorIndex",
         TableName : "FloorObjects",
         KeyConditionExpression: "#floor = :value",
         ExpressionAttributeNames:{
