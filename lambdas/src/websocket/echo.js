@@ -3,7 +3,6 @@ import {postToConnection} from '../util/connections';
 
 export const handler = async (event, context) => {
     const { echo = 'hello world!' } = JSON.parse(event.body);
-    const postData = JSON.stringify(echo);
 
     const scanParams = {
         TableName: 'Connections',
@@ -14,7 +13,7 @@ export const handler = async (event, context) => {
 
     await Promise.all(
         connectionData.Items.map(
-            ({ connectionId }) => postToConnection(connectionId, postData)
+            ({ connectionId }) => postToConnection(connectionId, echo)
         )
     );
 

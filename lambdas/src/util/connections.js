@@ -8,9 +8,10 @@ const managementApi = new AWS.ApiGatewayManagementApi({
     endpoint: `${process.env['API_ID']}.execute-api.${process.env['AWS_REGION']}.amazonaws.com/${process.env['STAGE']}`
 });
 
-export const postToConnection = async (ConnectionId, Data) => {
+export const postToConnection = async (ConnectionId, object) => {
     try {
-        logger.trace('Sending websocket message', { ConnectionId, Data });
+        const Data = JSON.stringify(object);
+        logger.trace(`Sending ${Data.length} char(s) via websocket`, { ConnectionId, Data });
         await managementApi.postToConnection({
             ConnectionId,
             Data
