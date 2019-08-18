@@ -33,7 +33,7 @@ const upsertObjectOnFloor = async (floor, object) => {
             criteria: {
                 table: 'floorObjects',
                 action: 'upsert',
-                id
+                id: object.objectId
             },
             ...object
         }
