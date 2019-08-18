@@ -15,7 +15,7 @@ export const getObjectsOnFloor = async (floor) => {
             ":value": floor
         }
     };
-    const objects = accessDDb("query", params);
-    logger.trace(`fetched ${objects.length} objects for floor ${floor}`);
-    return objects;
+    const {Items, Count} = accessDDb("query", params);
+    logger.trace(`fetched ${Items.length} objects for floor ${floor}`);
+    return Items;
 }
