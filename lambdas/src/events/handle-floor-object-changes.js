@@ -42,15 +42,15 @@ const upsertObjectOnFloor = async (floor, object) => {
 }
 
 export const handler = async ({ Records }, context, callback) =>
-    processRecords(Records, ({oldObject, newObject}) => {
+    processRecords(Records, async ({oldObject, newObject}) => {
         if (newObject && oldObject) {
-            upsertObjectOnFloor(newObject.floor, newObject)
+            await upsertObjectOnFloor(newObject.floor, newObject)
             if (newObject.floor !== oldObject.floor) {
-                deleteObjectFromFloor(oldObject.floor, oldObject.objectId);
+                await deleteObjectFromFloor(oldObject.floor, oldObject.objectId);
             }
         } else if (newObject) {
-            upsertObjectOnFloor(newObject.floor, newObject)
+            await upsertObjectOnFloor(newObject.floor, newObject)
         } else {
-            deleteObjectFromFloor(oldObject.floor, oldObject.objectId);
+            await deleteObjectFromFloor(oldObject.floor, oldObject.objectId);
         }
     });
