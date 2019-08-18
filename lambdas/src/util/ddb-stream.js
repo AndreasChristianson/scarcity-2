@@ -7,9 +7,11 @@ export const unmarshalTableItemImage = (image) =>
     dynamodbTranslator.translateOutput(image, ItemShape);
 
 export const processRecords = (Records, processFunction) => 
-    Records.map(({ dynamodb: { OldImage, NewImage, SequenceNumber, Keys }, ...event }) => {
-        const oldObject = unmarshalTableItemImage(OldImage);
-        const newObject = unmarshalTableItemImage(NewImage);
-        const keys = unmarshalTableItemImage(Keys);
-        return processFunction({oldObject, newObject, SequenceNumber, keys, event});
-    });
+    Promise.all(
+        Records.map(({ dynamodb: { OldImage, NewImage, SequenceNumber, Keys }, ...event }) => {
+            const oldObject = unmarshalTableItemImage(OldImage);
+            const newObject = unmarshalTableItemImage(NewImage);
+            const keys = unmarshalTableItemImage(Keys);
+            return processFunction({oldObject, newObject, SequenceNumber, keys, event});
+        })
+    );
