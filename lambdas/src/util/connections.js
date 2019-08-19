@@ -26,7 +26,7 @@ export const postToConnection = async (ConnectionId, object) => {
     }
 }
 
-export const getConnectionsByFloor = (floor) => {
+export const getConnectionsByFloor = async (floor) => {
     const results = await queryDDbByFields({
         table: 'Connections',
         index: 'byFloor',
