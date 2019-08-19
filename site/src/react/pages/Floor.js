@@ -1,13 +1,13 @@
 import React from "react";
-import Floor from '../components/FloorDisplay';
-import Chat from '../components/ChatDisplay';
+import FloorDisplay from '../components/FloorDisplay';
+import ChatDisplay from '../components/ChatDisplay';
 
 
 const Floor = () =>
     <>
         {'Floor'}
-        <Floor />
-        <Chat />
+        <FloorDisplay />
+        <ChatDisplay />
     </>
 ;
 
