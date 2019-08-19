@@ -1,4 +1,4 @@
-from troposphere.cloudfront import Distribution, DistributionConfig, CustomOriginConfig, ViewerCertificate, Origin, DefaultCacheBehavior, ForwardedValues
+from troposphere.cloudfront import CustomErrorResponse, Distribution, DistributionConfig, CustomOriginConfig, ViewerCertificate, Origin, DefaultCacheBehavior, ForwardedValues
 from troposphere.route53 import RecordSetType, AliasTarget
 
 from troposphere import GetAtt, Output
@@ -40,6 +40,11 @@ SiteCloudfront = Distribution(
             SslSupportMethod="sni-only"
         #   MinimumProtocolVersion: TLSv1.1_2016
         ),
+        CustomErrorResponses=[CustomErrorResponse(
+            ErrorCode=404,
+            ResponseCode=200,
+            ResponsePagePath="/"
+        )],
         HttpVersion='http2'
     )
 )
@@ -55,21 +60,9 @@ SiteDns = RecordSetType(
     )
 )
 
-# WwwSiteDns = RecordSetType(
-#     "WwwSiteDns",
-#     Type="A",
-#     Name="www." + constants.siteDomainName,
-#     HostedZoneName=constants.hostedZoneName,
-#     AliasTarget=AliasTarget(
-#         DNSName=GetAtt(SiteCloudfront, "DomainName"),
-#         HostedZoneId="Z2FDTNDATAQYW2"
-#     )
-# )
-
 def addResources(t): 
     t.add_resource(SiteCloudfront)
     t.add_resource(SiteDns)
-    # t.add_resource(WwwSiteDns)
     t.add_output([
         Output(
             "StaticSite",
