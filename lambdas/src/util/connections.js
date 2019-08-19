@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
-import {getLogger} from './logger';
+import { getLogger } from './logger';
+import { queryDDbByFields } from './ddb-crud';
 
 const logger = getLogger('connections');
 
@@ -24,3 +25,15 @@ export const postToConnection = async (ConnectionId, object) => {
         }
     }
 }
+
+export const getConnectionsByFloor = (floor) => {
+    const results = await queryDDbByFields({
+        table: 'Connections',
+        index: 'byFloor',
+        fields: {
+            floor
+        }
+    });
+    logger.trace(`found ${results.length} connections for floor ${floor}`)
+    return results.map(({connectionId}) => connectionId);
+};

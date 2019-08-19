@@ -4,7 +4,7 @@ import {accessDDb} from '../util/ddb-crud';
 const logger = getLogger('floor-objects');
 
 export const getObjectsOnFloor = async (floor) => {
-    var params = {
+    const params = {
         IndexName: "floorIndex",
         TableName : "FloorObjects",
         KeyConditionExpression: "#floor = :value",

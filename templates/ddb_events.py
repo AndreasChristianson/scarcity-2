@@ -84,6 +84,11 @@ lambdaDefinitions = [
         "table": "FloorObjectsTable",
         "handler": "floorObjectsChangeHandler",
     },
+    {
+        "name": "ChatChangeHandler",
+        "table": "ChatTable",
+        "handler": "chatChangeHandler",
+    },
 ]
 
 lambdas = list(map(createLambda, lambdaDefinitions))

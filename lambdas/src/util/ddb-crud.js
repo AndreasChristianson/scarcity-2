@@ -29,3 +29,37 @@ export const accessDDb = async (method, parameters) => {
         throw error;
     }
 };
+
+export const queryDDbByFields = async ({table, index, fields}) => {
+    const KeyConditionExpression = Object.keys(fields)
+        .map((key) => `#${key} = :${key}`)
+        .join(' and ');
+    const ExpressionAttributeNames = Object.keys(fields).reduce(
+        (accum, curr) => ({
+            [`#${curr}`]: curr,
+            ...accum
+        }),
+        {}
+    );
+    const ExpressionAttributeValues = Object.keys(fields).reduce(
+        (accum, curr) => ({
+            [`:${curr}`]: fields[curr],
+            ...accum
+        }),
+        {}
+    );
+    const params = {
+        IndexName: index,
+        TableName : table,
+        KeyConditionExpression,
+        ExpressionAttributeNames,
+        ExpressionAttributeValues
+    };
+    return queryDDb(params);
+};
+
+export const queryDDb = async (params) => {
+    const {Items, Count} = await accessDDb("query", params);
+    logger.trace(`fetched ${Items.length} objects via query`);
+    return Items;
+};

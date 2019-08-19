@@ -20,6 +20,7 @@ positionXAttribute = "positionX"
 positionYAttribute = "positionY"
 connectionIdAttribute = "connectionId"
 objectIdAttribute = "objectId"
+chatIdAttribute = "chatId"
 
 
 ConnectionsTable = Table(
@@ -51,16 +52,17 @@ ConnectionsTable = Table(
     ),
     GlobalSecondaryIndexes=[
         GlobalSecondaryIndex(
-            IndexName="accountIndex",
+            IndexName="byFloor",
             KeySchema=[
                 KeySchema(
-                    AttributeName=accountIdAttribute,
+                    AttributeName=floorAttribute,
                     KeyType="HASH"
                 ),
             ],
             Projection=Projection(
-                ProjectionType="KEYS_ONLY"
-            ),
+                ProjectionType="INCLUDE",
+                NonKeyAttributes=["connectionIdAttribute"]
+            )
         ),
     ]
 )
@@ -89,7 +91,7 @@ FloorObjectsTable = Table(
     ),
     GlobalSecondaryIndexes=[
         GlobalSecondaryIndex(
-            IndexName="floorIndex",
+            IndexName="byFloor",
             KeySchema=[
                 KeySchema(
                     AttributeName=floorAttribute,
@@ -124,16 +126,92 @@ FloorsTable = Table(
     )
 )
 
+ChatTable = Table(
+    "ChatTable",
+    BillingMode="PAY_PER_REQUEST",
+    TableName="Chat",
+    AttributeDefinitions=[
+        AttributeDefinition(
+            AttributeName=chatIdAttribute,
+            AttributeType="S"
+        ),
+        AttributeDefinition(
+            AttributeName="timestamp",
+            AttributeType="N"
+        ),
+        AttributeDefinition(
+            AttributeName="parent",
+            AttributeType="S"
+        ),
+        AttributeDefinition(
+            AttributeName="source",
+            AttributeType="S"
+        ),
+    ],
+    KeySchema=[
+        KeySchema(
+            AttributeName="timestamp",
+            KeyType="RANGE"
+        ),
+        KeySchema(
+            AttributeName=chatIdAttribute,
+            KeyType="HASH"
+        ),
+    ],
+    GlobalSecondaryIndexes=[
+        GlobalSecondaryIndex(
+            IndexName="byParent",
+            KeySchema=[
+                KeySchema(
+                    AttributeName="parent",
+                    KeyType="HASH"
+                ),
+                KeySchema(
+                    AttributeName="timestamp",
+                    KeyType="RANGE"
+                ),
+            ],
+            Projection=Projection(
+                ProjectionType="ALL"
+            ),
+        ),
+        GlobalSecondaryIndex(
+            IndexName="bySource",
+            KeySchema=[
+                KeySchema(
+                    AttributeName="source",
+                    KeyType="HASH"
+                ),
+                KeySchema(
+                    AttributeName="timestamp",
+                    KeyType="RANGE"
+                ),
+            ],
+            Projection=Projection(
+                ProjectionType="ALL"
+            ),
+        ),
+    ],
+    StreamSpecification=StreamSpecification(
+        StreamViewType="NEW_AND_OLD_IMAGES"
+    )
+)
+
 
 def addTables(t): 
     t.add_resource(ConnectionsTable)
     t.add_resource(FloorsTable)
     t.add_resource(FloorObjectsTable)
+    t.add_resource(ChatTable)
 
     t.add_output([
         Output(
             "ConnectionsTable",
             Value=Ref(ConnectionsTable)
+        ),
+        Output(
+            "ChatTable",
+            Value=Ref(ChatTable)
         ),
         Output(
             "FloorObjectsTable",
