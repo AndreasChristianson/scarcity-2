@@ -37,7 +37,7 @@ ConnectionsTable = Table(
             AttributeType="S"
         ),
         AttributeDefinition(
-            AttributeName=accountIdAttribute,
+            AttributeName=floorAttribute,
             AttributeType="S"
         ),
     ],
@@ -61,7 +61,7 @@ ConnectionsTable = Table(
             ],
             Projection=Projection(
                 ProjectionType="INCLUDE",
-                NonKeyAttributes=["connectionIdAttribute"]
+                NonKeyAttributes=[connectionIdAttribute]
             )
         ),
     ]
