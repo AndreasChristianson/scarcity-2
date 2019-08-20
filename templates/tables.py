@@ -150,12 +150,12 @@ ChatTable = Table(
     ],
     KeySchema=[
         KeySchema(
-            AttributeName="timestamp",
-            KeyType="RANGE"
-        ),
-        KeySchema(
             AttributeName=chatIdAttribute,
             KeyType="HASH"
+        ),
+        KeySchema(
+            AttributeName="timestamp",
+            KeyType="RANGE"
         ),
     ],
     GlobalSecondaryIndexes=[
