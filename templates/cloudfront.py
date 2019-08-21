@@ -1,7 +1,7 @@
 from troposphere.cloudfront import CustomErrorResponse, Distribution, DistributionConfig, CustomOriginConfig, ViewerCertificate, Origin, DefaultCacheBehavior, ForwardedValues
 from troposphere.route53 import RecordSetType, AliasTarget
 
-from troposphere import GetAtt, Output
+from troposphere import GetAtt, Output, Ref
 
 import constants
 
@@ -67,5 +67,9 @@ def addResources(t):
         Output(
             "StaticSite",
             Value=constants.siteDomainName,
+        ),
+        Output(
+            "distributionId",
+            Value=Ref(SiteCloudfront),
         )
     ])

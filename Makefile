@@ -64,5 +64,6 @@ deploy: upload template.json check-env
 		--api-id $$(aws cloudformation describe-stacks  --stack-name scarcity-$(env) --query "Stacks[0].Outputs[?OutputKey=='WssApiId'].OutputValue" --output text) \
 		--stage-name $(env) \
 		--description ${git_sha}
+	aws cloudfront create-invalidation --distribution-id $$(aws cloudformation describe-stacks  --stack-name scarcity-$(env) --query "Stacks[0].Outputs[?OutputKey=='distributionId'].OutputValue" --output text) --paths "/*"
 
 
