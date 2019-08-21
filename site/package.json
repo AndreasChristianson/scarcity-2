@@ -6,8 +6,7 @@
     "test": "jest --coverage",
     "prebuild": "rm -rf dist",
     "build": "npm run rawbuild -- --mode=\"production\"",
-    "dev": "nodemon --exec npm run build:dev --ignore dist/ --ignore coverage/",
-    "build:dev": "npm run rawbuild -- --mode=\"development\"",
+    "dev": "webpack-dev-server --open",
     "rawbuild": "webpack --config webpack.config.js",
     "postrawbuild": "cp static/* dist/"
   },
@@ -34,7 +33,8 @@
     "style-loader": "^0.23.1",
     "styled-components": "^4.3.2",
     "webpack": "^4.39.1",
-    "webpack-cli": "^3.3.6"
+    "webpack-cli": "^3.3.6",
+    "webpack-dev-server": "^3.8.0"
   },
   "jest": {
     "verbose": true,

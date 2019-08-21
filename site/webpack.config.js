@@ -8,6 +8,10 @@ const commitHash = require('child_process')
 
 module.exports = {
   entry: './src/index.js',
+  devServer: {
+    contentBase: './dist',
+    historyApiFallback: true
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'js/[name]-[contenthash].js',
@@ -19,7 +23,7 @@ module.exports = {
         test: /\.(js|jsx)$/,
         exclude: /(node_modules)/,
         loader: "babel-loader",
-        options: { 
+        options: {
           presets: [
             [
               "@babel/env",
@@ -28,7 +32,7 @@ module.exports = {
                 useBuiltIns: "usage",
                 corejs: 3
               }
-            ] 
+            ]
           ]
         }
       },
@@ -38,7 +42,7 @@ module.exports = {
       }
     ]
   },
-  plugins:[
+  plugins: [
     new HtmlWebpackPlugin({
       title: 'Scarcity',
       template: 'src/index-template.html'
