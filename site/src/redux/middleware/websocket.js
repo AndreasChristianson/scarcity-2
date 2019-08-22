@@ -1,15 +1,6 @@
 import getWssUrl from '../../services/wss/get-wss-url';
 import { LOG, SCARCITY_UPDATE, WS_CLOSED, WS_READY } from '../action-types';
 
-const assert = (value, validValues) =>{
-  if(!value){
-    throw new Error(`Empty value: ${value}`);
-  }
-  if(validValues && !validValues.includes(value)){
-    throw new Error(`Illegal value: ${value} (legal values are ${validValues})`);
-  }
-}
-
 const websocketMiddleware = store => {
   const websocket = new WebSocket(getWssUrl());
 
@@ -23,7 +14,7 @@ const websocketMiddleware = store => {
 
   websocket.onmessage = async ({ data }) => {
     try {
-      const { criteria: {table, ...criteria}, ...fields } = JSON.parse(data)
+      const { criteria: {table, ...criteria}, ...fields } = JSON.parse(data);
 
       store.dispatch({
         ...fields,
