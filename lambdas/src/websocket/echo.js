@@ -20,6 +20,6 @@ export const handler = async (event, context) => {
     return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
-        body: `Echo: ${postData}`
+        body: `Echo: ${echo}`
     };
 };

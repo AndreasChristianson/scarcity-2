@@ -1,10 +1,10 @@
-import AWS from 'aws-sdk';
+import {getDefaultLogger} from '../util/logger'
 
-const ddb = new AWS.DynamoDB.DocumentClient();
+const logger = getDefaultLogger();
 
 export const handler = async (event, context) => {
     const request = JSON.parse(event.body);
-    console.log('Bad request', {request, context});
+    logger.warn('Bad request', {request, context});
 
     return {
         statusCode: 400,
