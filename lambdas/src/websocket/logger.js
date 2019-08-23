@@ -1,6 +1,6 @@
-import {getDefaultLogger} from '../util/logger'
+import {getLogger} from '../util/logger'
 
-const logger = getDefaultLogger();
+const logger = getLogger();
 
 export const handler = async (event, context) => {
     const request = JSON.parse(event.body);
